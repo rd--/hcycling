@@ -1,6 +1,7 @@
 module Gearing ( Gear(..)
                , Tyre(..)
-               , cadence ) where
+               , cadence
+               , velocity ) where
 
 -- ISO tyre specification (millimetres)
 data Tyre = Tyre { tyre_section :: Int
@@ -36,3 +37,13 @@ cadence :: Tyre -> Gear -> Double -> Double
 cadence t g v =
     let v' = kph_mpm v
     in v' / (rollout t * ratio g)
+
+-- mpm = minutes per metre, kph = kilometres per hour
+mpm_kph :: Double -> Double
+mpm_kph x = (x * 60) / 1000
+
+-- t = tyre (Tyre), g = gear (Gear), c = cadence (rpm)
+velocity :: Tyre -> Gear -> Double -> Double
+velocity t g c =
+    let mpm = rollout t * ratio g * c
+    in mpm_kph mpm

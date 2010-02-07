@@ -1,8 +1,10 @@
-module Cycling ( mk_gearing
+module Cycling ( mk_cadence
+               , mk_gearing
                , mk_gearing_chart
                , mk_gradient
                , mk_gradient_chart ) where
 
+import qualified Data.List as L
 import qualified Gearing as G
 import qualified Power as P
 import qualified Text.Printf as P
@@ -56,3 +58,12 @@ mk_gearing_chart gs =
     let f = P.printf "%.1f"
         gs' = map (\(g,c,v) -> [show g, f c, f v]) gs
     in mk_chart ["gear", "cadence", "velocity"] gs'
+
+mk_cadence :: Double -> [(G.Gear, Double, Double)]
+mk_cadence c =
+  let t_23_622 = G.Tyre 23 622
+      cw = [39,53]
+      cs_12_25 = [12,13,14,15,16,17,19,21,23,25]
+      gs = [G.Gear r s | r <- cw, s <- cs_12_25]
+      cmp (_,_,x) (_,_,y) = compare x y
+  in L.sortBy cmp [(g, c, G.velocity t_23_622 g c) | g <- gs]

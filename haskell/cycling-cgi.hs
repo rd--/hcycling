@@ -16,6 +16,9 @@ dispatch _ _ st =
     let f df nm = read (fromMaybe df (lookup nm st))
         chart = fromMaybe "gearing" (lookup "chart" st)
         o = case chart of
+              "cadence" -> 
+                  let c = f "60.0" "cadence"
+                  in C.mk_gearing_chart (C.mk_cadence c)
               "gearing" -> 
                   let c_min = f "60.0" "cadence-minima"
                       c_max = f "110.0" "cadence-maxima"
