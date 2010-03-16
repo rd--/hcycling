@@ -30,14 +30,17 @@ mk_chart t g =
         h = H.html std_html_attr [hd, bd]
     in H.renderXHTML H.xhtml_1_0_strict h
 
-mk_gradient :: (Double, Double, Double) -> [(Double, Double, Double)]
-mk_gradient (t, m, w) =
-  let gs = [0, 0.5 .. 20]
+type R = Double
+
+mk_gradient :: (R, (R, R, R), R) -> [(R, R, R)]
+mk_gradient (t, (m_r, m_b, m_k), w) =
+  let m = m_r + m_b + m_k
+      gs = [0, 0.5 .. 20]
       f g = let (v, w') = P.velocity_std t m g w 
             in (g, v, w')
   in map f gs
 
-mk_gradient_chart :: [(Double, Double, Double)] -> String
+mk_gradient_chart :: [(R, R, R)] -> String
 mk_gradient_chart gs =
     let f = P.printf "%.1f"
         gs' = map (\(g,c,v) -> [f g, f c, f v]) gs

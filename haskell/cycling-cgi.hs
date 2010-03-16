@@ -36,7 +36,7 @@ dispatch _ _ st =
                       m_r = get_f 62 "rider-weight"
                       m_b = get_f 8 "bicycle-weight"
                       m_k = get_f 2 "kit-weight"
-                      m = m_r + m_b + m_k
+                      m = (m_r, m_b, m_k)
                       w = get_f 250 "power"
                   in C.mk_gradient_chart (C.mk_gradient (t, m, w))
               _ -> undefined
