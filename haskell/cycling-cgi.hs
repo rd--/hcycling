@@ -17,30 +17,25 @@ readMaybe s =
       [(i,"")] -> Just i
       _ -> Nothing
 
+revise_opt :: C.OPT -> [(String,String)] -> C.OPT
+revise_opt o st =
+   let get_f df nm = fromMaybe df (lookup nm st >>= readMaybe)
+   in map (\(x,y) -> (x, get_f y x)) o
+
 dispatch :: State -> String -> [(String,String)] -> CGI CGIResult
 dispatch _ _ st =
-    let get_f df nm = fromMaybe df (lookup nm st >>= readMaybe)
-        chart = fromMaybe "gearing" (lookup "chart" st)
-        o = case chart of
-              "cadence" -> 
-                  let c = get_f 60 "cadence"
-                  in C.mk_gearing_chart (C.mk_cadence c)
-              "gearing" -> 
-                  let c_min = get_f 60 "cadence-minima"
-                      c_max = get_f 110 "cadence-maxima"
-                      v = get_f 36 "velocity"
-                      g = (c_min, c_max, v)
-                  in C.mk_gearing_chart (C.mk_gearing g)
-              "gradient" -> 
-                  let t = get_f 0.05 "tolerance"
-                      m_r = get_f 62 "rider-weight"
-                      m_b = get_f 8 "bicycle-weight"
-                      m_k = get_f 2 "kit-weight"
-                      m = (m_r, m_b, m_k)
-                      w = get_f 250 "power"
-                  in C.mk_gradient_chart (C.mk_gradient (t, m, w))
-              _ -> undefined
-    in utf8_output o
+    let c = case lookup "chart" st of
+              Just "cadence" ->
+                  let o = revise_opt C.cadence_opt st
+                  in C.mk_cadence_chart o
+              Just "gearing" ->
+                  let o = revise_opt C.gearing_opt st
+                  in C.mk_gearing_chart o
+              Just "gradient" ->
+                  let o = revise_opt C.gradient_opt st
+                  in C.mk_gradient_chart o
+              _ -> C.mk_index
+    in utf8_output c
 
 del_qm :: String -> String
 del_qm ('?':xs) = xs

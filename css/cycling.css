@@ -1,6 +1,7 @@
 body {
  font-family: sans-serif;
  font-size: 8pt;
+ margin: 4em;
 }
 
 table {
@@ -16,3 +17,31 @@ td, th {
 a {
  color: #000;
 }
+
+li {
+ list-style: none;
+}
+
+dt {
+ clear: both;
+ float: left;
+ width: 9em;
+ color: #999;
+}
+
+dd {
+ float: left;
+ width: 24em;
+}
+
+input {
+ font-size: 100%;
+ padding: 0px;
+ margin: 0px 5px;
+ border: 1px dotted #ccc;
+}
+
+input.submit {
+ display: none;
+}
+
