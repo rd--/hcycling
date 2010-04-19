@@ -94,9 +94,9 @@ mk_gearing :: OPT -> [(G.Gear, Double, Double)]
 mk_gearing o =
   let [c_min, c_max, v] = map snd o
       t_23_622 = G.Tyre 23 622
-      cw = [39,53]
-      cs_12_25 = [12,13,14,15,16,17,19,21,23,25]
-      gs = [G.Gear c s | c <- cw, s <- cs_12_25]
+      cw = [30,34,39,53]
+      cs = [12,13,14,15,16,17,19,21,23,25,27]
+      gs = [G.Gear c s | c <- cw, s <- cs]
       valid_c c = c >= c_min && c <= c_max
       rs = [(g, G.cadence t_23_622 g v, v) | g <- gs]
   in filter (\(_,c,_) -> valid_c c) rs
@@ -117,9 +117,9 @@ mk_cadence :: OPT -> [(G.Gear, Double, Double)]
 mk_cadence o =
   let [c] = map snd o
       t_23_622 = G.Tyre 23 622
-      cw = [39,53]
-      cs_12_25 = [12,13,14,15,16,17,19,21,23,25]
-      gs = [G.Gear r s | r <- cw, s <- cs_12_25]
+      cw = [30,34,39,53]
+      cs = [12,13,14,15,16,17,19,21,23,25,27]
+      gs = [G.Gear r s | r <- cw, s <- cs]
       cmp (_,_,x) (_,_,y) = compare x y
   in L.sortBy cmp [(g, c, G.velocity t_23_622 g c) | g <- gs]
 
