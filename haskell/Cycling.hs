@@ -94,7 +94,7 @@ mk_gearing :: OPT -> [(G.Gear, Double, Double)]
 mk_gearing o =
   let [c_min, c_max, v] = map snd o
       t_23_622 = G.Tyre 23 622
-      cw = [30,34,39,53]
+      cw = [30,34,39,48,53]
       cs = [12,13,14,15,16,17,19,21,23,25,27]
       gs = [G.Gear c s | c <- cw, s <- cs]
       valid_c c = c >= c_min && c <= c_max
