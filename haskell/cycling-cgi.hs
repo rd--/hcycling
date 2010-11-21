@@ -17,9 +17,15 @@ readMaybe s =
       [(i,"")] -> Just i
       _ -> Nothing
 
+read_var :: String -> Maybe C.VAR
+read_var xs =
+    case xs of
+      ('[':_) -> readMaybe xs >>= return . C.L_VAR
+      _ -> readMaybe xs >>= return . C.R_VAR
+
 revise_opt :: C.OPT -> [(String,String)] -> C.OPT
 revise_opt o st =
-   let get_f df nm = fromMaybe df (lookup nm st >>= readMaybe)
+   let get_f df nm = fromMaybe df (lookup nm st >>= read_var)
    in map (\(x,y) -> (x, get_f y x)) o
 
 dispatch :: State -> String -> [(String,String)] -> CGI CGIResult

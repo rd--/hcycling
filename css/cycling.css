@@ -39,6 +39,7 @@ input {
  padding: 0px;
  margin: 0px 5px;
  border: 1px dotted #ccc;
+ width: 18em;
 }
 
 input.submit {

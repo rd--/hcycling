@@ -1,4 +1,4 @@
-module Cycling (OPT
+module Cycling (VAR(..),OPT
                ,cadence_opt,mk_cadence_chart
                ,gearing_opt,mk_gearing_chart
                ,gradient_opt,mk_gradient_chart
@@ -31,8 +31,33 @@ mk_chart fm t g =
     in H.renderXHTML H.xhtml_1_0_strict h
 
 type R = Double
-type VAR = (String,R)
-type OPT = [VAR]
+data VAR = R_VAR R
+         | L_VAR [R]
+type NVAR = (String,VAR)
+type OPT = [NVAR]
+
+unR :: NVAR -> R
+unR o =
+    case o of
+      (_,R_VAR x) -> x
+      _ -> 0
+
+unL :: NVAR -> [R]
+unL o =
+    case o of
+      (_,L_VAR xs) -> xs
+      _ -> []
+
+showR :: R -> String
+showR x =
+    let (i,f) = properFraction x :: (Integer,R)
+    in if f == 0.0 then show i else show x
+
+showV :: VAR -> String
+showV v =
+    case v of
+      R_VAR x -> showR x
+      L_VAR xs -> "[" ++ L.intercalate "," (map showR xs) ++ "]"
 
 opt_form :: [(String,String)] -> OPT -> X.Content
 opt_form z o =
@@ -51,7 +76,7 @@ opt_form z o =
                [H.type' "text"
                ,H.name k
                ,H.value v]]]
-        mk_r (k,v) = mk_s (k,show v)
+        mk_r (k,v) = mk_s (k,showV v)
         sb = H.input [H.class' "submit"
                      ,H.type' "submit"
                      ,H.value "calculate"]
@@ -61,15 +86,15 @@ opt_form z o =
 
 gradient_opt :: OPT
 gradient_opt =
-    [("tolerance", 0.05)
-    ,("rider-weight", 62)
-    ,("bicycle-weight", 8)
-    ,("kit-weight", 2)
-    ,("power", 250)]
+    [("tolerance", R_VAR 0.05)
+    ,("rider-weight", R_VAR 62)
+    ,("bicycle-weight", R_VAR 8)
+    ,("kit-weight", R_VAR 2)
+    ,("power", R_VAR 250)]
 
 mk_gradient :: OPT -> [(R, R, R)]
 mk_gradient o =
-  let [t, m_r, m_b, m_k, w] = map snd o
+  let [t, m_r, m_b, m_k, w] = map unR o
       m = m_r + m_b + m_k
       gs = [0, 0.5 .. 20]
       f g = let (v, w') = P.velocity_std t m g w
@@ -86,17 +111,18 @@ mk_gradient_chart o =
 
 gearing_opt :: OPT
 gearing_opt =
-    [("cadence-minima", 60)
-    ,("cadence-maxima", 110)
-    ,("velocity", 36)]
+    [("cadence-minima", R_VAR 60)
+    ,("cadence-maxima", R_VAR 110)
+    ,("velocity", R_VAR 36)
+    ,("chainrings", L_VAR [39,53])
+    ,("sprockets", L_VAR [11,12,13,14,15,17,19,21,23,25])]
 
 mk_gearing :: OPT -> [(G.Gear, Double, Double)]
 mk_gearing o =
-  let [c_min, c_max, v] = map snd o
+  let [c_min, c_max, v] = map unR (take 3 o)
+      [cr, cs] = map unL (drop 3 o)
       t_23_622 = G.Tyre 23 622
-      cw = [30,34,39,48,53]
-      cs = [12,13,14,15,16,17,19,21,23,25,27]
-      gs = [G.Gear c s | c <- cw, s <- cs]
+      gs = [G.Gear (floor c) (floor s) | c <- cr, s <- cs]
       valid_c c = c >= c_min && c <= c_max
       rs = [(g, G.cadence t_23_622 g v, v) | g <- gs]
   in filter (\(_,c,_) -> valid_c c) rs
@@ -111,11 +137,11 @@ mk_gearing_chart o =
 
 cadence_opt :: OPT
 cadence_opt =
-    [("cadence", 60)]
+    [("cadence", R_VAR 60)]
 
 mk_cadence :: OPT -> [(G.Gear, Double, Double)]
 mk_cadence o =
-  let [c] = map snd o
+  let [c] = map unR o
       t_23_622 = G.Tyre 23 622
       cw = [30,34,39,53]
       cs = [12,13,14,15,16,17,19,21,23,25,27]
