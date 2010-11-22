@@ -11,21 +11,9 @@ utf8_output s = do
 
 type State = ()
 
-readMaybe :: (Read a) => String -> Maybe a
-readMaybe s =
-    case reads s of
-      [(i,"")] -> Just i
-      _ -> Nothing
-
-read_var :: String -> Maybe C.VAR
-read_var xs =
-    case xs of
-      ('[':_) -> readMaybe xs >>= return . C.L_VAR
-      _ -> readMaybe xs >>= return . C.R_VAR
-
-revise_opt :: C.OPT -> [(String,String)] -> C.OPT
+revise_opt :: C.OPT -> C.OPT -> C.OPT
 revise_opt o st =
-   let get_f df nm = fromMaybe df (lookup nm st >>= read_var)
+   let get_f df nm = fromMaybe df (lookup nm st)
    in map (\(x,y) -> (x, get_f y x)) o
 
 dispatch :: State -> String -> [(String,String)] -> CGI CGIResult
@@ -34,9 +22,12 @@ dispatch _ _ st =
               Just "cadence" ->
                   let o = revise_opt C.cadence_opt st
                   in C.mk_cadence_chart o
-              Just "gearing" ->
-                  let o = revise_opt C.gearing_opt st
-                  in C.mk_gearing_chart o
+              Just "gearing-cadence" ->
+                  let o = revise_opt C.gearing_cadence_opt st
+                  in C.mk_gearing_cadence_chart o
+              Just "gearing-measurements" ->
+                  let o = revise_opt C.gearing_measurements_opt st
+                  in C.mk_gearing_measurements_chart o
               Just "gradient" ->
                   let o = revise_opt C.gradient_opt st
                   in C.mk_gradient_chart o

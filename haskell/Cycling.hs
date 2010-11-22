@@ -1,10 +1,14 @@
-module Cycling (VAR(..),OPT
+module Cycling (OPT
                ,cadence_opt,mk_cadence_chart
-               ,gearing_opt,mk_gearing_chart
+               ,gearing_cadence_opt,mk_gearing_cadence_chart
+               ,gearing_measurements_opt,mk_gearing_measurements_chart
                ,gradient_opt,mk_gradient_chart
                ,mk_index) where
 
+import qualified Data.Function as F
 import qualified Data.List as L
+import qualified Data.List.Split as S
+import qualified Data.Maybe as M
 import qualified Gearing as G
 import qualified Power as P
 import qualified Text.Printf as P
@@ -31,33 +35,41 @@ mk_chart fm t g =
     in H.renderXHTML H.xhtml_1_0_strict h
 
 type R = Double
-data VAR = R_VAR R
-         | L_VAR [R]
-type NVAR = (String,VAR)
-type OPT = [NVAR]
+type VAR = (String,String)
+type OPT = [VAR]
 
-unR :: NVAR -> R
-unR o =
-    case o of
-      (_,R_VAR x) -> x
-      _ -> 0
+read_maybe :: (Read a) => String -> Maybe a
+read_maybe s =
+    case reads s of
+      [(i,"")] -> Just i
+      _ -> Nothing
 
-unL :: NVAR -> [R]
-unL o =
-    case o of
-      (_,L_VAR xs) -> xs
-      _ -> []
+read_r :: String -> R
+read_r x = maybe 0.0 id (read_maybe x)
 
-showR :: R -> String
-showR x =
+unR :: VAR -> R
+unR = read_r . snd
+
+read_l :: String -> [R]
+read_l s =
+    let xs = S.sepBy "," s
+    in M.mapMaybe read_maybe xs
+
+unL :: VAR -> [R]
+unL = read_l . snd
+
+unTY :: VAR -> G.Tyre
+unTY = G.read_iso_tyre . snd
+
+{-
+show_r :: R -> String
+show_r x =
     let (i,f) = properFraction x :: (Integer,R)
     in if f == 0.0 then show i else show x
 
-showV :: VAR -> String
-showV v =
-    case v of
-      R_VAR x -> showR x
-      L_VAR xs -> "[" ++ L.intercalate "," (map showR xs) ++ "]"
+show_l :: [R] -> String
+show_l xs = "[" ++ L.intercalate "," (map show_r xs) ++ "]"
+-}
 
 opt_form :: [(String,String)] -> OPT -> X.Content
 opt_form z o =
@@ -76,21 +88,20 @@ opt_form z o =
                [H.type' "text"
                ,H.name k
                ,H.value v]]]
-        mk_r (k,v) = mk_s (k,showV v)
         sb = H.input [H.class' "submit"
                      ,H.type' "submit"
                      ,H.value "calculate"]
     in H.form
          [H.action "./", H.method "get"]
-         (map mk_h z ++ map mk_r o ++ [sb])
+         (map mk_h z ++ map mk_s o ++ [sb])
 
 gradient_opt :: OPT
 gradient_opt =
-    [("tolerance", R_VAR 0.05)
-    ,("rider-weight", R_VAR 62)
-    ,("bicycle-weight", R_VAR 8)
-    ,("kit-weight", R_VAR 2)
-    ,("power", R_VAR 250)]
+    [("tolerance", "0.05")
+    ,("rider-weight", "62")
+    ,("bicycle-weight", "8")
+    ,("kit-weight", "2")
+    ,("power", "250")]
 
 mk_gradient :: OPT -> [(R, R, R)]
 mk_gradient o =
@@ -109,45 +120,55 @@ mk_gradient_chart o =
         fm = opt_form [("chart","gradient")] o
     in mk_chart fm ["gradient", "velocity", "power"] gs'
 
-gearing_opt :: OPT
-gearing_opt =
-    [("cadence-minima", R_VAR 60)
-    ,("cadence-maxima", R_VAR 110)
-    ,("velocity", R_VAR 36)
-    ,("chainrings", L_VAR [39,53])
-    ,("sprockets", L_VAR [11,12,13,14,15,17,19,21,23,25])]
+std_chainrings,std_sprockets :: String
+std_chainrings = "39,53"
+std_sprockets = "11,12,13,14,15,17,19,21,23,25"
 
-mk_gearing :: OPT -> [(G.Gear, Double, Double)]
-mk_gearing o =
-  let [c_min, c_max, v] = map unR (take 3 o)
-      [cr, cs] = map unL (drop 3 o)
-      t_23_622 = G.Tyre 23 622
+gearing_cadence_opt :: OPT
+gearing_cadence_opt =
+    [("cadence-minima", "60")
+    ,("cadence-maxima", "110")
+    ,("velocity", "36")
+    ,("chainrings", std_chainrings)
+    ,("sprockets", std_sprockets)
+    ,("iso-tyre", "23-622")]
+
+section :: [a] -> (Int,Int) -> [a]
+section xs (i,j) = take (j - i + 1) (drop i xs)
+
+mk_gearing_cadence :: OPT -> [(G.Gear, Double, Double)]
+mk_gearing_cadence o =
+  let [c_min, c_max, v] = map unR (section o (0,2))
+      [cr, cs] = map unL (section o (3,4))
+      ty = unTY (o !! 5)
       gs = [G.Gear (floor c) (floor s) | c <- cr, s <- cs]
       valid_c c = c >= c_min && c <= c_max
-      rs = [(g, G.cadence t_23_622 g v, v) | g <- gs]
+      rs = [(g, G.cadence ty g v, v) | g <- gs]
   in filter (\(_,c,_) -> valid_c c) rs
 
-mk_gearing_chart :: OPT -> String
-mk_gearing_chart o =
+mk_gearing_cadence_chart :: OPT -> String
+mk_gearing_cadence_chart o =
     let f = P.printf "%.1f"
-        gs = mk_gearing o
+        gs = mk_gearing_cadence o
         gs' = map (\(g,c,v) -> [show g, f c, f v]) gs
-        fm = opt_form [("chart","gearing")] o
+        fm = opt_form [("chart","gearing-cadence")] o
     in mk_chart fm ["gear", "cadence", "velocity"] gs'
 
 cadence_opt :: OPT
 cadence_opt =
-    [("cadence", R_VAR 60)]
+    [("cadence", "60")
+    ,("chainrings", std_chainrings)
+    ,("sprockets", std_sprockets)
+    ,("iso-tyre", "23-622")]
 
 mk_cadence :: OPT -> [(G.Gear, Double, Double)]
 mk_cadence o =
-  let [c] = map unR o
-      t_23_622 = G.Tyre 23 622
-      cw = [30,34,39,53]
-      cs = [12,13,14,15,16,17,19,21,23,25,27]
-      gs = [G.Gear r s | r <- cw, s <- cs]
+  let c = unR (o !! 0)
+      [cr,cs] = map unL (section o (1,2))
+      ty = unTY (o !! 3)
+      gs = [G.Gear (floor r) (floor s) | r <- cr, s <- cs]
       cmp (_,_,x) (_,_,y) = compare x y
-  in L.sortBy cmp [(g, c, G.velocity t_23_622 g c) | g <- gs]
+  in L.sortBy cmp [(g, c, G.velocity ty g c) | g <- gs]
 
 mk_cadence_chart :: OPT -> String
 mk_cadence_chart o =
@@ -157,9 +178,34 @@ mk_cadence_chart o =
         fm = opt_form [("chart","cadence")] o
     in mk_chart fm ["gear", "cadence", "velocity"] gs'
 
+gearing_measurements_opt :: OPT
+gearing_measurements_opt =
+    [("chainrings", std_chainrings)
+    ,("sprockets", std_sprockets)
+    ,("iso-tyre", "23-622")]
+
+mk_gearing_measurements :: OPT -> [(G.Gear, Double, Double)]
+mk_gearing_measurements o =
+  let [cr, cs] = map unL (section o (0,1))
+      ty = unTY (o !! 2)
+      gs = [G.Gear (floor c) (floor s) | c <- cr, s <- cs]
+      f = L.sortBy (compare `F.on` (\(_,x,_) -> x))
+  in f [(g, G.gear_metres ty g, G.gear_inches ty g) | g <- gs]
+
+mk_gearing_measurements_chart :: OPT -> String
+mk_gearing_measurements_chart o =
+    let f = P.printf "%.1f"
+        gs = mk_gearing_measurements o
+        gs' = map (\(g,c,v) -> [show g, f c, f v]) gs
+        fm = opt_form [("chart","gearing-measurements")] o
+    in mk_chart fm ["gear", "metres", "inches"] gs'
+
 mk_index :: String
 mk_index =
-    let cs = L.sort ["cadence", "gearing", "gradient"]
+    let cs = L.sort ["cadence"
+                    ,"gearing-cadence"
+                    ,"gearing-measurements"
+                    ,"gradient"]
         mk_ln c = H.li [] [H.a [H.href ("?chart="++c)] [H.cdata c]]
         hd = H.head [] [H.title [] [H.cdata "cycling"], css]
         bd = H.body [] [H.ul [] (map mk_ln cs)]
