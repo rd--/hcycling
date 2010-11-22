@@ -3,17 +3,20 @@ module Cycling (OPT
                ,gearing_cadence_opt,mk_gearing_cadence_chart
                ,gearing_measurements_opt,mk_gearing_measurements_chart
                ,gradient_opt,mk_gradient_chart
+               ,vam_opt,mk_vam_chart
                ,mk_index) where
 
 import qualified Data.Function as F
 import qualified Data.List as L
 import qualified Data.List.Split as S
 import qualified Data.Maybe as M
-import qualified Gearing as G
-import qualified Power as P
 import qualified Text.Printf as P
 import qualified Text.HTML.Light as H
 import qualified Text.XML.Light as X
+
+import qualified Gearing as G
+import qualified Power as P
+import qualified VAM as V
 
 std_html_attr :: [X.Attr]
 std_html_attr = [H.xmlns "http://www.w3.org/1999/xhtml"
@@ -101,13 +104,14 @@ gradient_opt =
     ,("rider-weight", "62")
     ,("bicycle-weight", "8")
     ,("kit-weight", "2")
-    ,("power", "250")]
+    ,("power", "250")
+    ,("gradients", "6,7,8,9,10,11,12")]
 
 mk_gradient :: OPT -> [(R, R, R)]
 mk_gradient o =
-  let [t, m_r, m_b, m_k, w] = map unR o
+  let [t, m_r, m_b, m_k, w] = map unR (section o (0,4))
+      gs = unL (o !! 5)
       m = m_r + m_b + m_k
-      gs = [0, 0.5 .. 20]
       f g = let (v, w') = P.velocity_std t m g w
             in (g, v, w')
   in map f gs
@@ -200,12 +204,34 @@ mk_gearing_measurements_chart o =
         fm = opt_form [("chart","gearing-measurements")] o
     in mk_chart fm ["gear", "metres", "inches"] gs'
 
+vam_opt :: OPT
+vam_opt =
+    [("vertical-ascension", "600")
+    ,("time", "20")
+    ,("average-gradient", "8")
+    ,("starting-altitude", "0")]
+
+mk_vam :: OPT -> (Double, Double)
+mk_vam o =
+  let [va,t,gr,a] = map unR o
+      vmh = V.vam va t
+      wkg = V.vam_to_power vmh a gr
+  in (vmh,wkg)
+
+mk_vam_chart :: OPT -> String
+mk_vam_chart o =
+    let f = P.printf "%.1f"
+        (vmh,wkg) = mk_vam o
+        fm = opt_form [("chart","velocita-ascensionale-media")] o
+    in mk_chart fm ["vm/h", "watts/kg"] [[f vmh,f wkg]]
+
 mk_index :: String
 mk_index =
     let cs = L.sort ["cadence"
                     ,"gearing-cadence"
                     ,"gearing-measurements"
-                    ,"gradient"]
+                    ,"gradient"
+                    ,"velocita-ascensionale-media"]
         mk_ln c = H.li [] [H.a [H.href ("?chart="++c)] [H.cdata c]]
         hd = H.head [] [H.title [] [H.cdata "cycling"], css]
         bd = H.body [] [H.ul [] (map mk_ln cs)]

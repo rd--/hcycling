@@ -31,6 +31,9 @@ dispatch _ _ st =
               Just "gradient" ->
                   let o = revise_opt C.gradient_opt st
                   in C.mk_gradient_chart o
+              Just "velocita-ascensionale-media" ->
+                  let o = revise_opt C.vam_opt st
+                  in C.mk_vam_chart o
               _ -> C.mk_index
     in utf8_output c
 
