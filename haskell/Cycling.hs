@@ -4,6 +4,7 @@ module Cycling (OPT
                ,gearing_measurements_opt,mk_gearing_measurements_chart
                ,gradient_opt,mk_gradient_chart
                ,vam_opt,mk_vam_chart
+               ,avg_vel_opt,mk_avg_vel_chart
                ,mk_index) where
 
 import qualified Data.Function as F
@@ -16,7 +17,9 @@ import qualified Text.XML.Light as X
 
 import qualified Gearing as G
 import qualified Power as P
-import qualified VAM as V
+import qualified Time as T
+import qualified VAM as VAM
+import qualified Velocity as V
 
 std_html_attr :: [X.Attr]
 std_html_attr = [H.xmlns "http://www.w3.org/1999/xhtml"
@@ -214,8 +217,8 @@ vam_opt =
 mk_vam :: OPT -> (Double, Double)
 mk_vam o =
   let [va,t,gr,a] = map unR o
-      vmh = V.vam va t
-      wkg = V.vam_to_power vmh a gr
+      vmh = VAM.vam va t
+      wkg = VAM.vam_to_power vmh a gr
   in (vmh,wkg)
 
 mk_vam_chart :: OPT -> String
@@ -225,13 +228,31 @@ mk_vam_chart o =
         fm = opt_form [("chart","velocita-ascensionale-media")] o
     in mk_chart fm ["vm/h", "watts/kg"] [[f vmh,f wkg]]
 
+avg_vel_opt :: OPT
+avg_vel_opt =
+    [("distance", "30")
+    ,("time", "0:30:00:00")]
+
+mk_avg_vel :: OPT -> Double
+mk_avg_vel o =
+  let [ds,tm] = map snd o
+  in V.kph (read ds) (T.parse_hms tm)
+
+mk_avg_vel_chart :: OPT -> String
+mk_avg_vel_chart o =
+    let f = P.printf "%.1f"
+        v = mk_avg_vel o
+        fm = opt_form [("chart","average-velocity")] o
+    in mk_chart fm ["kph", "mph"] [[f v,f (V.kph_to_mph v)]]
+
 mk_index :: String
 mk_index =
     let cs = L.sort ["cadence"
                     ,"gearing-cadence"
                     ,"gearing-measurements"
                     ,"gradient"
-                    ,"velocita-ascensionale-media"]
+                    ,"velocita-ascensionale-media"
+                    ,"average-velocity"]
         mk_ln c = H.li [] [H.a [H.href ("?chart="++c)] [H.cdata c]]
         hd = H.head [] [H.title [] [H.cdata "cycling"], css]
         bd = H.body [] [H.ul [] (map mk_ln cs)]

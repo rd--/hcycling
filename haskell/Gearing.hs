@@ -5,6 +5,7 @@ module Gearing ( Gear(..)
                , gear_metres, gear_inches ) where
 
 import qualified Data.List.Split as S
+import qualified Velocity as V
 
 -- ISO tyre specification (millimetres)
 data Tyre = Tyre { tyre_section :: Int
@@ -36,25 +37,17 @@ instance Show Gear where
 ratio :: Gear -> Double
 ratio (Gear c s) = fromIntegral c / fromIntegral s
 
--- kph = kilometres per hour, mpm = minutes per metre
-kph_mpm :: Double -> Double
-kph_mpm x = (x * 1000) / 60
-
 -- t = tyre (Tyre), g = gear (Gear), v = velocity (kph)
 cadence :: Tyre -> Gear -> Double -> Double
 cadence t g v =
-    let v' = kph_mpm v
+    let v' = V.kph_to_mpm v
     in v' / (rollout t * ratio g)
-
--- mpm = minutes per metre, kph = kilometres per hour
-mpm_kph :: Double -> Double
-mpm_kph x = (x * 60) / 1000
 
 -- t = tyre (Tyre), g = gear (Gear), c = cadence (rpm)
 velocity :: Tyre -> Gear -> Double -> Double
 velocity t g c =
     let mpm = rollout t * ratio g * c
-    in mpm_kph mpm
+    in V.mpm_to_kph mpm
 
 gear_metres :: Tyre -> Gear -> Double
 gear_metres t g = rollout t * ratio g

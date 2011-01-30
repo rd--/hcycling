@@ -1,6 +1,7 @@
 module Power (velocity_std) where
 
-import Solve
+import qualified Solve as S
+import qualified Velocity as V
 
 {-
 
@@ -26,9 +27,6 @@ power :: (Num a) => a -> a -> a -> a -> a -> a -> a -> a -> a -> a
 power ka vw m mE g s cr a v = 
     ((ka * (v + vw) * (v + vw)) + (m * g * (s + cr)) + (mE * a)) * v
 
-kph_ms :: (Fractional a) => a -> a
-kph_ms x = (x * 1000) / (60 * 60)
-
 power_std :: (Fractional a) => a -> a -> a -> a
 power_std m s v =
     let ka = 0.225
@@ -37,7 +35,7 @@ power_std m s v =
         g = 9.806
         cr = 0.003
         a = 0
-    in power ka vw m mE g (s / 100) cr a (kph_ms v)
+    in power ka vw m mE g (s / 100) cr a (V.kph_to_mps v)
 
 velocity_std :: (Fractional x, Ord x) => x -> x -> x -> x -> (x, x)
-velocity_std t m s w = solve (power_std m s) t w 36 (4, EQ)
+velocity_std t m s w = S.solve (power_std m s) t w 36 (4, EQ)

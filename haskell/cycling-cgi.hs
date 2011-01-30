@@ -34,6 +34,9 @@ dispatch _ _ st =
               Just "velocita-ascensionale-media" ->
                   let o = revise_opt C.vam_opt st
                   in C.mk_vam_chart o
+              Just "average-velocity" ->
+                  let o = revise_opt C.avg_vel_opt st
+                  in C.mk_avg_vel_chart o
               _ -> C.mk_index
     in utf8_output c
 
