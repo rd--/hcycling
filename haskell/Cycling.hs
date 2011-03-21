@@ -231,12 +231,12 @@ mk_vam_chart o =
 avg_vel_opt :: OPT
 avg_vel_opt =
     [("distance", "30")
-    ,("time", "0:30:00:00")]
+    ,("time", "0:30:00.00")]
 
 mk_avg_vel :: OPT -> Double
 mk_avg_vel o =
   let [ds,tm] = map snd o
-  in V.kph (read ds) (T.parse_hms tm)
+  in V.kph (read ds) (T.parse_hms' tm)
 
 mk_avg_vel_chart :: OPT -> String
 mk_avg_vel_chart o =
