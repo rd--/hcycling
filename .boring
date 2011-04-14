@@ -1,3 +1,2 @@
 ^index.cgi$
-.*\.hi$
-.*\.o$
+^dist$

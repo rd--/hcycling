@@ -9,7 +9,7 @@ import qualified Velocity as V
 
 -- ISO tyre specification (millimetres)
 data Tyre = Tyre { tyre_section :: Int
-     	         , bead_diameter :: Int }
+                 , bead_diameter :: Int }
 
 instance Show Tyre where
     show (Tyre s b) = show s ++ "-" ++ show b
@@ -29,7 +29,7 @@ rollout t =
     in (s * 2 + b) * pi
 
 data Gear = Gear { chainwheel :: Int
-     	    	 , sprocket :: Int }
+                 , sprocket :: Int }
 
 instance Show Gear where
     show (Gear c s) = show c ++ "/" ++ show s

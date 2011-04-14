@@ -1,0 +1,40 @@
+name:              hcycling
+version:           0.1
+description:       haskell cycling
+author:            Rohan Drape
+maintainer:        rd@slavepianos.org
+stability:         Experimental
+homepage:          http://slavepianos.org/rd/?t=hcycling
+tested-with:       GHC==6.12.1
+build-type:        Simple
+cabal-version:     >= 1.8
+
+data-files:        README
+                   css/*.css
+
+library
+  build-depends:   base == 4.*,split
+  ghc-options:     -Wall -fwarn-tabs
+  hs-source-dirs:  haskell
+  exposed-modules: Gearing
+                   Physiology
+                   Power
+                   Solve
+                   Time
+                   VAM
+                   Velocity
+
+executable cycling-cgi
+  build-depends:   base==4.*,cgi,hcycling,html-minimalist,network,split,urlencoded,xml
+  hs-source-dirs:  haskell
+  other-modules:   Cycling
+  main-is:         cycling-cgi.hs
+  ghc-options:     -Wall -fwarn-tabs
+
+source-repository  head
+  Type:            darcs
+  Location:        http://slavepianos.org/rd/tn/hcycling
+
+-- Local Variables:
+-- truncate-lines:t
+-- End:
