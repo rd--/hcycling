@@ -1,4 +1,4 @@
-module VAM where
+module Cycling.VAM where
 
 {-
 http://www.53x12.com/do/show?page=article&id=74

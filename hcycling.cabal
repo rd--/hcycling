@@ -13,21 +13,21 @@ data-files:        README
                    css/*.css
 
 library
-  build-depends:   base == 4.*,split
+  build-depends:   base == 4.*,html-minimalist,split,xml
   ghc-options:     -Wall -fwarn-tabs
   hs-source-dirs:  haskell
-  exposed-modules: Gearing
-                   Physiology
-                   Power
-                   Solve
-                   Time
-                   VAM
-                   Velocity
+  exposed-modules: Cycling.Chart
+                   Cycling.Gearing
+                   Cycling.Physiology
+                   Cycling.Power
+                   Cycling.Solve
+                   Cycling.Time
+                   Cycling.VAM
+                   Cycling.Velocity
 
 executable cycling-cgi
   build-depends:   base==4.*,cgi,hcycling,html-minimalist,network,split,urlencoded,xml
   hs-source-dirs:  haskell
-  other-modules:   Cycling
   main-is:         cycling-cgi.hs
   ghc-options:     -Wall -fwarn-tabs
 

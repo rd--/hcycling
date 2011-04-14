@@ -1,4 +1,4 @@
-module Physiology where
+module Cycling.Physiology where
 
 -- * Age predicted heart rate maxima.
 

@@ -1,11 +1,11 @@
-module Cycling (OPT
-               ,cadence_opt,mk_cadence_chart
-               ,gearing_cadence_opt,mk_gearing_cadence_chart
-               ,gearing_measurements_opt,mk_gearing_measurements_chart
-               ,gradient_opt,mk_gradient_chart
-               ,vam_opt,mk_vam_chart
-               ,avg_vel_opt,mk_avg_vel_chart
-               ,mk_index) where
+module Cycling.Chart (OPT
+                     ,cadence_opt,mk_cadence_chart
+                     ,gearing_cadence_opt,mk_gearing_cadence_chart
+                     ,gearing_measurements_opt,mk_gearing_measurements_chart
+                     ,gradient_opt,mk_gradient_chart
+                     ,vam_opt,mk_vam_chart
+                     ,avg_vel_opt,mk_avg_vel_chart
+                     ,mk_index) where
 
 import qualified Data.Function as F
 import qualified Data.List as L
@@ -15,11 +15,11 @@ import qualified Text.Printf as P
 import qualified Text.HTML.Light as H
 import qualified Text.XML.Light as X
 
-import qualified Gearing as G
-import qualified Power as P
-import qualified Time as T
-import qualified VAM as VAM
-import qualified Velocity as V
+import qualified Cycling.Gearing as G
+import qualified Cycling.Power as P
+import qualified Cycling.Time as T
+import qualified Cycling.VAM as VAM
+import qualified Cycling.Velocity as V
 
 std_html_attr :: [X.Attr]
 std_html_attr = [H.xmlns "http://www.w3.org/1999/xhtml"

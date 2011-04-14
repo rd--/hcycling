@@ -1,4 +1,4 @@
-import qualified Cycling as C
+import qualified Cycling.Chart as C
 import Data.Maybe
 import qualified Data.URLEncoded as U
 import Network.CGI

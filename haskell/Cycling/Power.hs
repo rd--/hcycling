@@ -1,7 +1,7 @@
-module Power (velocity_std) where
+module Cycling.Power (velocity_std) where
 
-import qualified Solve as S
-import qualified Velocity as V
+import qualified Cycling.Solve as S
+import qualified Cycling.Velocity as V
 
 {-
 

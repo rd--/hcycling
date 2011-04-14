@@ -1,11 +1,11 @@
-module Gearing ( Gear(..)
-               , Tyre(..), read_iso_tyre
-               , cadence
-               , velocity
-               , gear_metres, gear_inches ) where
+module Cycling.Gearing ( Gear(..)
+                       , Tyre(..), read_iso_tyre
+                       , cadence
+                       , velocity
+                       , gear_metres, gear_inches ) where
 
 import qualified Data.List.Split as S
-import qualified Velocity as V
+import qualified Cycling.Velocity as V
 
 -- ISO tyre specification (millimetres)
 data Tyre = Tyre { tyre_section :: Int

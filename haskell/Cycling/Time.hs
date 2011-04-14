@@ -1,4 +1,4 @@
-module Time where
+module Cycling.Time where
 
 import qualified Data.List.Split as S
 

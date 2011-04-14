@@ -1,4 +1,4 @@
-module Velocity where
+module Cycling.Velocity where
 
 -- k = distance (km),h = hours,m = minutes,s = seconds,ms = milli-seconds
 kph :: (Fractional a) => a -> (a, a, a, a) -> a

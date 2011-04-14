@@ -1,4 +1,4 @@
-module Solve (solve) where
+module Cycling.Solve (solve) where
 
 solve :: (Fractional x, Num a, Ord a) =>
          (x -> a) -> a -> a -> x -> (x, Ordering) -> (x, a)
