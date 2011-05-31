@@ -1,4 +1,4 @@
-module Cycling.Power (velocity_std) where
+module Cycling.Power (power_std,velocity_std) where
 
 import qualified Cycling.Solve as S
 import qualified Cycling.Velocity as V
@@ -24,7 +24,7 @@ Kc = convergence parameter (0.5-2.0)
 -}
 
 power :: (Num a) => a -> a -> a -> a -> a -> a -> a -> a -> a -> a
-power ka vw m mE g s cr a v = 
+power ka vw m mE g s cr a v =
     ((ka * (v + vw) * (v + vw)) + (m * g * (s + cr)) + (mE * a)) * v
 
 power_std :: (Fractional a) => a -> a -> a -> a
