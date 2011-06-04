@@ -22,8 +22,8 @@ mk_chart (w,h) fn p = do
       r = toRenderable l
   case fn of
     Just fn' -> case takeExtension fn' of
-                  "pdf" -> renderableToPDFFile r w h fn'
-                  "svg" -> renderableToSVGFile r w h fn'
+                  ".pdf" -> renderableToPDFFile r w h fn'
+                  ".svg" -> renderableToSVGFile r w h fn'
                   _ -> error "mk_chart: unknown extension"
     Nothing -> renderableToWindow r w h
 
