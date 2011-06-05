@@ -21,6 +21,7 @@ library
                    Cycling.Physiology
                    Cycling.Power
                    Cycling.Solve
+                   Cycling.Temperature
                    Cycling.Time
                    Cycling.VAM
                    Cycling.Velocity

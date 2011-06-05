@@ -1,5 +1,17 @@
 module Cycling.Velocity where
 
+-- to km
+mile :: Fractional t => t
+mile = 1.609344
+
+-- to km
+nautical_mile :: Fractional t => t
+nautical_mile = 1.852
+
+-- to m
+foot :: Fractional t => t
+foot = 0.3048
+
 -- k = distance (km),h = hours,m = minutes,s = seconds,ms = milli-seconds
 kph :: (Fractional a) => a -> (a, a, a, a) -> a
 kph k (h,m,s,ms) =
@@ -8,7 +20,13 @@ kph k (h,m,s,ms) =
 
 -- kph = kilometres per hour, mph = miles per hour
 kph_to_mph :: (Fractional t) => t -> t
-kph_to_mph = (*) 0.621371192
+kph_to_mph = (*) (recip mile)
+
+mph_to_kph :: (Fractional t) => t -> t
+mph_to_kph = (*) mile
+
+feet_to_metres :: (Fractional t) => t -> t
+feet_to_metres = (*) foot
 
 -- kph = kilometres per hour, mpm = minutes per metre
 kph_to_mpm :: Double -> Double
