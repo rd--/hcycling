@@ -24,6 +24,7 @@ library
                    Cycling.Time
                    Cycling.VAM
                    Cycling.Velocity
+                   Cycling.Weight
 
 executable cycling-cgi
   build-depends:   base==4.*,cgi,hcycling,html-minimalist,network,split,urlencoded,xml
