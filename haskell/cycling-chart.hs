@@ -32,14 +32,21 @@ clr_cyc = cycle [black,blue,red,yellow,green,orange,cyan,magenta]
 
 gradient_v_tbl :: (R,R,R) -> [R] -> [R]
 gradient_v_tbl (tolerance,mass,power) =
-    let f g = fst (P.velocity_std tolerance mass g power)
+    let f x = fst (P.velocity_std tolerance mass x power)
     in map f
 
-gradient_v_chart :: Maybe FilePath -> (R,R) -> [R] -> [R] -> IO ()
-gradient_v_chart fn (t,w) m g = do
+to_diff :: [[R]] -> [[R]]
+to_diff i =
+    case i of
+      (x:xs) -> map (zipWith (-) x) (x:xs)
+      _ -> undefined
+
+gradient_v_chart :: Maybe FilePath -> Bool -> (R,R) -> [R] -> [R] -> IO ()
+gradient_v_chart fn df (t,w) m g = do
   let l = map (\m' -> show (w,m')) m
       v = map (\m' -> gradient_v_tbl (t,m',w) g) m
-      p = zipWith3 mk_plot_ln l clr_cyc (map (zip g) v)
+      v' = if df then to_diff v else v
+      p = zipWith3 mk_plot_ln l clr_cyc (map (zip g) v')
   mk_chart (1920,1080) fn p
 
 gradient_p_tbl :: (R,R) -> [R] -> [R]
@@ -56,6 +63,6 @@ gradient_p_chart fn v m g = do
 
 {-
 gradient_v_tbl (0.05,63+9,250) [0,0.5 .. 18]
-gradient_v_chart Nothing (0.05,250) [65,70 .. 100] [-5,-4.5 .. 20]
+gradient_v_chart Nothing False (0.05,250) [65,70 .. 100] [-5,-4.5 .. 20]
 gradient_p_chart Nothing 20 [65,70 .. 100] [0,0.5 .. 20]
 -}
