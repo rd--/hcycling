@@ -1,8 +1,8 @@
-import Data.Colour
+import Data.Colour {- colour -}
 import Data.Colour.Names
-import Graphics.Rendering.Chart hiding (c)
+import Graphics.Rendering.Chart hiding (c) {- chart -}
 import Graphics.Rendering.Chart.Gtk
-import System.FilePath
+import System.FilePath {- filepath -}
 
 import qualified Cycling.Power as P
 
