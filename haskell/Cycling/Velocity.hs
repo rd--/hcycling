@@ -15,7 +15,7 @@ foot = 0.3048
 -- k = distance (km),h = hours,m = minutes,s = seconds,ms = milli-seconds
 kph :: (Fractional a) => a -> (a, a, a, a) -> a
 kph k (h,m,s,ms) =
-    let t = h + (m / 60) + (s / (60 * 60)) + (ms / (60 * 60 * 100))
+    let t = h + (m / 60) + (s / (60 * 60)) + (ms / (60 * 60 * 1000))
     in k / t
 
 -- kph = kilometres per hour, mph = miles per hour

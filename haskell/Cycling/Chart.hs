@@ -230,7 +230,7 @@ mk_vam_chart o =
 
 avg_vel_opt :: OPT
 avg_vel_opt =
-    [("distance", "30")
+    [("distance", "30.0")
     ,("time", "0:30:00.00")]
 
 mk_avg_vel :: OPT -> Double

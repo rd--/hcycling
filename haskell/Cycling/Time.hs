@@ -5,7 +5,7 @@ import qualified Data.List.Split as S
 s_ms :: (Integral i) => Double -> (i,i)
 s_ms s =
     let s' = floor s
-        ms = round (s - fromIntegral s')
+        ms = round ((s - fromIntegral s') * 1000)
     in (s',ms)
 
 -- allows either "H:M:S.MS" or "M:S.MS" or "M"
