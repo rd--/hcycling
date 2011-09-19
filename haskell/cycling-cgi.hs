@@ -22,6 +22,9 @@ dispatch _ _ st =
               Just "cadence" ->
                   let o = revise_opt C.cadence_opt st
                   in C.mk_cadence_chart o
+              Just "cadence-tyre" ->
+                  let o = revise_opt C.cadence_tyre_opt st
+                  in C.mk_cadence_tyre_chart o
               Just "gearing-cadence" ->
                   let o = revise_opt C.gearing_cadence_opt st
                   in C.mk_gearing_cadence_chart o

@@ -16,7 +16,8 @@ library
   build-depends:   base == 4.*,html-minimalist,split,xml
   ghc-options:     -Wall -fwarn-tabs
   hs-source-dirs:  haskell
-  exposed-modules: Cycling.Chart
+  exposed-modules: Cycling.Cassette
+                   Cycling.Chart
                    Cycling.Gearing
                    Cycling.Physiology
                    Cycling.Power

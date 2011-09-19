@@ -19,6 +19,9 @@ read_iso_tyre x =
     let [s,b] = S.sepBy "-" x
     in Tyre (read s) (read b)
 
+instance Read Tyre where
+    readsPrec _ x = [(read_iso_tyre x,"")]
+
 iso_m :: Tyre -> (Double, Double)
 iso_m (Tyre s b) = (fromIntegral s / 1000, fromIntegral b / 1000)
 
