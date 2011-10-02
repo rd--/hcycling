@@ -8,14 +8,14 @@ s_ms s =
         ms = round ((s - fromIntegral s') * 1000)
     in (s',ms)
 
--- allows either "H:M:S.MS" or "M:S.MS" or "M"
+-- allows either "H:M:S.MS" or "M:S.MS" or "S.MS"
 parse_hms :: (Read i,Integral i) => String -> (i,i,i,i)
 parse_hms x =
     let f (h,m,s) = let (s',ms) = s_ms s in (h,m,s',ms)
     in case S.splitOneOf ":" x of
         [h,m,s] -> f (read h,read m,read s)
         [m,s] -> f (0,read m,read s)
-        [m] -> f (0,read m,0)
+        [s] -> f (0,0,read s)
         _ -> error "parse_hms"
 
 parse_hms' :: (Read i,Num i) => String -> (i,i,i,i)
