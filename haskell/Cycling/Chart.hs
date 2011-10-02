@@ -171,19 +171,18 @@ mk_gearing_cadence_chart o =
 
 cadence_opt :: OPT
 cadence_opt =
-    [("cadence", "60")
+    [("cadences", "90,110")
     ,("chainrings", std_chainrings)
     ,("sprockets", std_sprockets)
     ,("iso-tyre", "23-622")]
 
 mk_cadence :: OPT -> [(G.Gear, Double, Double)]
 mk_cadence o =
-  let c = unR (o !! 0)
-      [cr,cs] = map unRl (section o (1,2))
+  let [cd,cr,cs] = map unRl (section o (0,2))
       ty = unTY (o !! 3)
       gs = [G.Gear (floor r) (floor s) | r <- cr, s <- cs]
       cmp (_,_,x) (_,_,y) = compare x y
-  in L.sortBy cmp [(g, c, G.velocity ty g c) | g <- gs]
+  in L.sortBy cmp [(g, c, G.velocity ty g c) | c <- cd, g <- gs]
 
 mk_cadence_chart :: OPT -> String
 mk_cadence_chart o =
