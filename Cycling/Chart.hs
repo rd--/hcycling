@@ -264,11 +264,11 @@ avg_vel_opt =
     [("distance", "30.0")
     ,("times", "0:30:00.00")]
 
-mk_avg_vel :: OPT -> [(T.HMSM Integer,Double)]
+mk_avg_vel :: OPT -> [(T.Duration,Double)]
 mk_avg_vel o =
   let ds = read (snd (o !! 0))
       ts = unL (o !! 1)
-      ks = map (V.kph ds . T.hmsm_tuple fromIntegral) ts
+      ks = map (V.kph ds) ts
   in zip ts ks
 
 mk_avg_vel_chart :: OPT -> String
@@ -276,7 +276,7 @@ mk_avg_vel_chart o =
     let f = P.printf "%.1f"
         tv = mk_avg_vel o
         fm = opt_form [("chart","average-velocity")] o
-        g (t,v) = [T.show_hmsm t,f v,f (V.kph_to_mph v)]
+        g (t,v) = [show t,f v,f (V.kph_to_mph v)]
     in mk_chart fm ["tm","kph","mph"] (map g tv)
 
 mk_index :: String

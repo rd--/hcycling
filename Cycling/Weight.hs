@@ -2,18 +2,21 @@ module Cycling.Weight where
 
 import Data.Ratio
 
+-- | Convert factor from /lb/s to kilograms.
 lb :: (Fractional t) => t
 lb = 0.45359237
 
+-- | Convert from kilograms to /lb/s.
+--
+-- > map (round.kg_to_lbs) [59,68,77,86] == [130,150,170,190]
 kg_to_lbs :: (Fractional t) => t -> t
 kg_to_lbs = (*) (recip lb)
 
+-- | Convert from /lb/s to kilograms.
+--
+-- > map (round.lbs_to_kgs) [120,130 .. 200] == [54,59,64,68,73,77,82,86,91]
 lbs_to_kgs :: (Fractional t) => t -> t
 lbs_to_kgs = (*) lb
-
-{-
-map lbs_to_kgs [120,130 .. 200]
--}
 
 avoirdupois_lb :: Rational
 avoirdupois_lb = 9%20

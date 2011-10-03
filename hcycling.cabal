@@ -5,7 +5,7 @@ author:            Rohan Drape
 maintainer:        rd@slavepianos.org
 stability:         Experimental
 homepage:          http://slavepianos.org/rd/?t=hcycling
-tested-with:       GHC==7.0.3
+tested-with:       GHC==7.0.4
 build-type:        Simple
 cabal-version:     >= 1.8
 
@@ -13,15 +13,24 @@ data-files:        README
                    css/*.css
 
 library
-  build-depends:   base == 4.*,html-minimalist,split,xml
+  build-depends:   base == 4.*,
+                   Chart,cmath,colour,csv,
+                   frisby,
+                   html-minimalist,
+                   old-locale,
+                   split,
+                   time,
+                   xml
   ghc-options:     -Wall -fwarn-tabs
-  hs-source-dirs:  haskell
   exposed-modules: Cycling.Cassette
                    Cycling.Chart
                    Cycling.Gearing
+                   Cycling.Interval
                    Cycling.Physiology
+                   Cycling.Plot
                    Cycling.Power
                    Cycling.Solve
+                   Cycling.T3C
                    Cycling.Temperature
                    Cycling.Time
                    Cycling.VAM
@@ -29,8 +38,15 @@ library
                    Cycling.Weight
 
 executable cycling-cgi
-  build-depends:   base==4.*,cgi,hcycling,html-minimalist,network,split,urlencoded,xml
-  hs-source-dirs:  haskell
+  build-depends:   base==4.*,
+                   cgi,cmath,
+                   hcycling,html-minimalist,
+                   network,
+                   old-locale,
+                   split,
+                   time,
+                   urlencoded,
+                   xml
   main-is:         cycling-cgi.hs
   ghc-options:     -Wall -fwarn-tabs
 

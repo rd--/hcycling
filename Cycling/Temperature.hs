@@ -1,3 +1,4 @@
+-- | Temperature unit conversion
 module Cycling.Temperature where
 
 import Data.Ratio
