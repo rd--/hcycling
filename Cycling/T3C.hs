@@ -96,11 +96,11 @@ t3c_date_cmp_p f d i =
 t3c_date_after_p :: UTCTime -> (T3C -> Bool)
 t3c_date_after_p d = t3c_date_cmp_p (>=) d
 
-t3c_date_befort3c_p :: UTCTime -> (T3C -> Bool)
-t3c_date_befort3c_p d = t3c_date_cmp_p (<=) d
+t3c_date_before_p :: UTCTime -> (T3C -> Bool)
+t3c_date_before_p d = t3c_date_cmp_p (<=) d
 
 t3c_date_within_p :: (UTCTime,UTCTime) -> (T3C -> Bool)
-t3c_date_within_p (l,r) i = t3c_date_after_p l i && t3c_date_befort3c_p r i
+t3c_date_within_p (l,r) i = t3c_date_after_p l i && t3c_date_before_p r i
 
 t3c_week_starting :: UTCTime -> T3C -> Bool
 t3c_week_starting t = t3c_date_within_p (t,add_days 6 t)
@@ -220,14 +220,14 @@ t3c_chart fx r = do
       a = nm (0,hr_limit) (map hr_average r)
       m = nm (0,hr_limit) (map hr_maximum r)
       d = nm (0,10) (map (diff_time_hours . duration) r)
-      e = nm (0,5000) (map energy r)
+      e = nm (0,6000) (map energy r)
       t = nm (1,5) (map training_effect r)
   print (mk_summary r)
   C.plotWindow (map fx (zip [0..] r))
        a (hr_range_txt "avg" hr_limit) C.Plus -- C.Solid
        m (hr_range_txt "max" hr_limit) C.Plus -- C.Solid
        d "dur (0-10)" C.HollowCircle -- C.Solid
-       e "energy (0-4000)" C.Triangle -- C.Solid
+       e "energy (0-6000)" C.Triangle -- C.Solid
        t "te (1-5)" C.DownTriangle -- C.Solid
 
 sort_on :: (Ord b) => (a -> b) -> [a] -> [a]
