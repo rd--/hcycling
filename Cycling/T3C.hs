@@ -220,14 +220,14 @@ t3c_chart fx r = do
       a = nm (0,hr_limit) (map hr_average r)
       m = nm (0,hr_limit) (map hr_maximum r)
       d = nm (0,10) (map (diff_time_hours . duration) r)
-      e = nm (0,6000) (map energy r)
+      e = nm (0,5000) (map energy r)
       t = nm (1,5) (map training_effect r)
   print (mk_summary r)
   C.plotWindow (map fx (zip [0..] r))
        a (hr_range_txt "avg" hr_limit) C.Plus -- C.Solid
        m (hr_range_txt "max" hr_limit) C.Plus -- C.Solid
        d "dur (0-10)" C.HollowCircle -- C.Solid
-       e "energy (0-6000)" C.Triangle -- C.Solid
+       e "energy (0-5000)" C.Triangle -- C.Solid
        t "te (1-5)" C.DownTriangle -- C.Solid
 
 sort_on :: (Ord b) => (a -> b) -> [a] -> [a]
@@ -262,7 +262,7 @@ t3c_chart_summary s = do
       ha = mk_plot_tr "hr-avg" N.blue 0.1 (nm_tr (80,hr_limit) s_t3c_avg s)
       hm = mk_plot_tr "hr-max" N.red 0.2 (nm_tr (80,hr_limit) s_t3c_max s)
       en = mk_plot_tr "en" N.yellow 0.3 (nm_tr (100,5000) s_en s)
-      en_t = mk_plot_pt "en-t" N.yellow 0.3 (nm (100,12000) s_en_t s)
+      en_t = mk_plot_pt "en-t" N.yellow 0.3 (nm (100,15000) s_en_t s)
       te = mk_plot_tr "te" N.aqua 0.4 (nm_tr (1,5) s_te s)
   mk_chart (1024,576) Nothing [ne,du,du_t,ha,hm,en,en_t,te]
 
