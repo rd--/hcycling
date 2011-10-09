@@ -55,6 +55,7 @@ instance Read Duration where
 -- | 'Show' function for 'Duration'.
 --
 -- > show_duration (Duration 1 35 5 250) == "01:35:05.250"
+-- > show (Duration 1 15 0 000) == "01:15:00.000"
 show_duration :: Duration -> String
 show_duration (Duration h m s ms) =
     let f :: Int -> String
