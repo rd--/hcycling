@@ -2,7 +2,7 @@ module Cycling.Weight where
 
 import Data.Ratio
 
--- | Convert factor from /lb/s to kilograms.
+-- | Conversion factor from /lb/s to kilograms.
 lb :: (Fractional t) => t
 lb = 0.45359237
 
