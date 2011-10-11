@@ -9,7 +9,7 @@ type R = Double
 
 -- | Generate a point chart.
 --
--- > mk_chart (100,100) Nothing [mk_plot_pt "test" C.black 0 [3,0,6]]
+-- > mk_chart (100,100) Nothing [mk_plot_pt "pt" C.black 0 [3,0,6]]
 mk_plot_pt :: String -> C.Colour R -> R -> [R] -> Plot R R
 mk_plot_pt t clr xn y =
   let x = [1+xn,2+xn..]
@@ -22,7 +22,7 @@ mk_plot_pt t clr xn y =
 
 -- | Generate an error value chart.  The triples are /(lower,value,upper)/.
 --
--- > let p = mk_plot_tr "test" C.black 0 [(2,3,4),(3,7,14)]
+-- > let p = mk_plot_tr "tr" C.black 0 [(2,3,4),(3,7,14)]
 -- > in mk_chart (100,100) Nothing [p]
 mk_plot_tr :: String -> C.Colour R -> R -> [(R,R,R)] -> Plot R R
 mk_plot_tr t clr xn y =
@@ -33,6 +33,18 @@ mk_plot_tr t clr xn y =
       c = defaultPlotErrBars {plot_errbars_title_ = t
                              ,plot_errbars_line_style_ = s
                              ,plot_errbars_values_ = v}
+  in toPlot c
+
+-- | Generate a line set chart.  The duples are /(x,y)/.
+--
+-- > let p = mk_plot_ln "ln" C.black 0 [[(2,3),(3,3)],[(7,14),(9,11)]]
+-- > in mk_chart (100,100) Nothing [p]
+mk_plot_ln :: String -> C.Colour R -> R -> [[(R,R)]] -> Plot R R
+mk_plot_ln t clr xn ln =
+  let s = solidLine 1 (C.opaque clr)
+      c = defaultPlotLines {plot_lines_title_ = t
+                           ,plot_lines_style_ = s
+                           ,plot_lines_values_ = ln}
   in toPlot c
 
 -- | Generate a rendering of a set of 'Plot's.
