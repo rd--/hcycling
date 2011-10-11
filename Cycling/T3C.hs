@@ -2,10 +2,10 @@
 module Cycling.T3C where
 
 import Control.Monad
-import qualified Data.Colour.Names as N {- colour -}
 import qualified Cycling.Interval as I
 import Cycling.Plot
 import Cycling.Time
+import qualified Data.Colour.Names as N {- colour -}
 import Data.Function
 import Data.List
 import Data.Maybe
@@ -32,17 +32,29 @@ duration_h = diff_time_hours . duration
 
 -- | Real valued time-stamp (days).
 time_stamp :: T3C -> R
-time_stamp hr =
-    let t = date_time hr
-        d = utctDay t
-        d' = fromIntegral (toModifiedJulianDay d)
-        s = utctDayTime t
-        s_max = 86401
-    in d' + (fromRational (toRational s) / s_max)
+time_stamp = time_days . date_time
 
 -- | Parse list of 'I.Interval's from 'notes' field.
 intervals :: T3C -> Maybe [I.Interval]
 intervals = I.intervals . notes
+
+-- | Transform interval sequence durations into adjacent /(start,end)/
+-- duples.
+--
+-- > intervals_adjacent [(11,157),(12,158)] == [((0,11),157),((11,23),158)]
+intervals_adjacent :: [I.Interval] -> [((Integer,Integer),Integer)]
+intervals_adjacent =
+    let f n i = case i of
+                  [] -> []
+                  (d,hr):i' -> let n' = d + n in ((n,n'),hr) : f n' i'
+    in f 0
+
+-- | Parse list of 'I.Interval's from 'notes' field.
+intervals_duration :: Maybe [I.Interval] -> Integer
+intervals_duration i =
+    case i of
+      Nothing -> 0
+      Just i' -> sum (map fst i')
 
 -- * Parsing and formatting
 
@@ -230,8 +242,11 @@ t3c_chart fx r = do
        e "energy (0-5000)" C.Triangle -- C.Solid
        t "te (1-5)" C.DownTriangle -- C.Solid
 
+-- | Variant that 'sort's on 'Ord' value extracted by /f/.
+--
+-- > sort_on snd [('a',1),('b',0)] == [('b',0),('a',1)]
 sort_on :: (Ord b) => (a -> b) -> [a] -> [a]
-sort_on f = sortBy (compare `on` f)
+sort_on = sortBy . on compare
 
 t3c_plot :: (T3C -> Bool) -> IO ()
 t3c_plot p = do
@@ -247,6 +262,35 @@ t3c_plot' p cmp = do
 
 t3c_plot_by_date :: (String,String) -> IO ()
 t3c_plot_by_date rg = t3c_plot (by_date rg)
+
+-- | Variant of 'zip' that discards elements from the /lhs/ list that
+-- do not have a counterpart in the /rhs/ list.
+--
+-- > zipMaybe [1..] [Just 'a',Nothing,Just 'c'] == [(1,'a'),(3,'c')]
+zipMaybe :: [a] -> [Maybe b] -> [(a,b)]
+zipMaybe i j =
+    case (i,j) of
+      ([],_) -> []
+      (_,[]) -> []
+      (_:i',Nothing:j') -> zipMaybe i' j'
+      (p:p',Just q:q') -> (p,q) : zipMaybe p' q'
+
+-- > tc3_plot_intervals (const True)
+tc3_plot_intervals :: (T3C -> Bool) -> IO ()
+tc3_plot_intervals p = do
+  hr <- t3c_load
+  let hr' = filter p (sort_on time_stamp hr)
+      i = map intervals hr'
+      i' = map (liftM intervals_adjacent) i
+      average x = fromIntegral (sum x) / fromIntegral (length x)
+      lm_mx = maximum (map intervals_duration i)
+      lm_av = average (filter (/= 0) (map intervals_duration i))
+      f (t,y) = let g n = t + (fromIntegral n / lm_av)
+                in map (\((l,r),x) -> let x' = fromIntegral x
+                                      in [(g l,x'),(g r,x')]) y
+      v = map f (zipMaybe (map time_stamp hr') i')
+      pl = mk_plot_ln (show ("I",lm_av,lm_mx)) N.red (concat v)
+  mk_chart (100,100) Nothing [pl]
 
 -- * Chart (summary)
 
