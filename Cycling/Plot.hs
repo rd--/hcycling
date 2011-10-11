@@ -37,10 +37,10 @@ mk_plot_tr t clr xn y =
 
 -- | Generate a line set chart.  The duples are /(x,y)/.
 --
--- > let p = mk_plot_ln "ln" C.black 0 [[(2,3),(3,3)],[(7,14),(9,11)]]
+-- > let p = mk_plot_ln "ln" C.black [[(2,3),(3,3)],[(7,14),(9,11)]]
 -- > in mk_chart (100,100) Nothing [p]
-mk_plot_ln :: String -> C.Colour R -> R -> [[(R,R)]] -> Plot R R
-mk_plot_ln t clr xn ln =
+mk_plot_ln :: String -> C.Colour R -> [[(R,R)]] -> Plot R R
+mk_plot_ln t clr ln =
   let s = solidLine 1 (C.opaque clr)
       c = defaultPlotLines {plot_lines_title_ = t
                            ,plot_lines_style_ = s
