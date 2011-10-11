@@ -115,7 +115,8 @@ format_date_time t = (format_date t,format_time t)
 parse_duration :: String -> DiffTime
 parse_duration = utctDayTime . readTime defaultTimeLocale "%H:%M'%S"
 
--- | Format duration in @H:M'S@ form, the duration must be less than 24 hours.
+-- | Format duration in @H:M'S@ form, the duration must be less than
+-- 24 hours.
 --
 -- > format_duration (parse_duration "21:44'30") == "21:44'30"
 format_duration :: DiffTime -> String
@@ -157,3 +158,15 @@ format_hours h =
 -- > toGregorian (utctDay (add_days 1 (parse_date "2011-10-09"))) == (2011,10,10)
 add_days :: Integer -> UTCTime -> UTCTime
 add_days n (UTCTime d t) = UTCTime (addDays n d) t
+
+-- | Time in fractional days.
+--
+-- > round (time_days (parse_date_time ("2011-10-09","09:00"))) == 55843
+-- > round (time_days (parse_date_time ("2011-10-09","21:00"))) == 55844
+time_days :: UTCTime -> Double
+time_days t =
+    let d = utctDay t
+        d' = fromIntegral (toModifiedJulianDay d)
+        s = utctDayTime t
+        s_max = 86401
+    in d' + (fromRational (toRational s) / s_max)
