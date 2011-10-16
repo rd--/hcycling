@@ -2,9 +2,6 @@
 module Cycling.T3C where
 
 import Control.Monad
-import qualified Cycling.Interval as I
-import Cycling.Plot
-import Cycling.Time
 import qualified Data.Colour.Names as N {- colour -}
 import Data.Function
 import Data.List
@@ -14,16 +11,23 @@ import qualified Graphics.Rendering.Chart.Simple as C {- chart -}
 import Text.CSV {- csv -}
 import Text.Printf
 
+import qualified Cycling.Interval as I
+import qualified Cycling.Plot as P
+import Cycling.Time
 
 -- * T3C data type
 
+-- | A synonym for 'Double'.
+type R = Double
+
+-- | T3C session data.
 data T3C = T3C {date_time :: UTCTime
                ,duration :: DiffTime
                ,training_effect :: R
                ,hr_average :: R
                ,hr_maximum :: R
                ,energy :: R
-               ,notes :: String }
+               ,notes :: String}
            deriving (Eq,Show)
 
 -- | Real valued duration (hours).
@@ -40,10 +44,12 @@ intervals = I.intervals . notes
 
 -- * Parsing and formatting
 
--- | Parse T3C entry
+-- | Parse T3C entry from CSV field list.  Note that an entry where
+-- all but the date and note fields are blank is ignored as a comment.
 t3c_parse :: [String] -> Maybe T3C
 t3c_parse i =
     case i of
+      [_,"     ","        ","   ","   ","   ","    ",_] -> Nothing
       [dt,tm,du,te,av,mx,en,nt] ->
           let dt' = parse_date_time (dt,tm)
               du' = parse_duration du
@@ -52,10 +58,9 @@ t3c_parse i =
               mx' = read mx
               en' = read en
           in Just (T3C dt' du' te' av' mx' en' nt)
-      [_,"                               ",_] -> Nothing
       _ -> error ("t3c_parse: " ++ show i)
 
--- | Format E value.
+-- | Format a 'T3C' value.
 t3c_format :: T3C -> [String]
 t3c_format (T3C dt du te av mx en n) =
     [format_date dt
@@ -67,17 +72,17 @@ t3c_format (T3C dt du te av mx en n) =
     ,show (floor en::Int)
     ,n]
 
--- | E to CSV.
+-- | 'T3C' to CSV.
 t3c_csv :: T3C -> String
 t3c_csv = intercalate "," . t3c_format
 
--- | Print T3C entry as CSV
+-- | Print 'T3C' entry as CSV
 t3c_print :: T3C -> IO ()
 t3c_print = print . t3c_csv
 
-t3c_load :: IO [T3C]
-t3c_load = do
-  (Right r) <- parseCSVFromFile "hr-data.csv"
+t3c_load :: FilePath -> IO [T3C]
+t3c_load fn = do
+  (Right r) <- parseCSVFromFile fn
   return (mapMaybe t3c_parse r)
 
 -- * Selection functions (t3c predicates)
@@ -136,11 +141,11 @@ stat_map f (x,(s1,s2,s3)) = (x,(f s1,f s2,f s3))
 
 -- * IO interaction
 
-with_hr :: ([T3C] -> a) -> IO a
-with_hr f = t3c_load >>= return.f
+with_hr :: FilePath -> ([T3C] -> a) -> IO a
+with_hr fn f = t3c_load fn >>= return.f
 
-with_t3c_io :: ([T3C] -> IO a) -> IO a
-with_t3c_io = join . with_hr
+with_t3c_io :: FilePath -> ([T3C] -> IO a) -> IO a
+with_t3c_io fn = join . with_hr fn
 
 -- * Summary
 
@@ -180,8 +185,8 @@ summary_PP s =
 instance Show Summary where
     show = summary_PP
 
-summary :: (T3C -> Bool) -> IO ()
-summary p = with_t3c_io (putStrLn . summary_PP . mk_summary . filter p)
+summary :: FilePath -> (T3C -> Bool) -> IO ()
+summary fn p = with_t3c_io fn (putStrLn . summary_PP . mk_summary . filter p)
 
 weekly_summary_from :: UTCTime -> [T3C] -> [Summary]
 weekly_summary_from t r =
@@ -230,20 +235,20 @@ t3c_chart fx r = do
 sort_on :: (Ord b) => (a -> b) -> [a] -> [a]
 sort_on = sortBy . on compare
 
-t3c_plot :: (T3C -> Bool) -> IO ()
-t3c_plot p = do
-  r <- t3c_load
+t3c_plot :: FilePath -> (T3C -> Bool) -> IO ()
+t3c_plot fn p = do
+  r <- t3c_load fn
   let r' = filter p (sort_on time_stamp r)
   t3c_chart (time_stamp . snd) r'
 
-t3c_plot' :: (Ord a) => (T3C -> Bool) -> (T3C -> a) -> IO ()
-t3c_plot' p cmp = do
-  r <- t3c_load
+t3c_plot_sort :: (Ord a) => FilePath -> (T3C -> Bool) -> (T3C -> a) -> IO ()
+t3c_plot_sort fn p cmp = do
+  r <- t3c_load fn
   let r' = filter p (sort_on cmp r)
   t3c_chart (fromIntegral . fst) r'
 
-t3c_plot_by_date :: (String,String) -> IO ()
-t3c_plot_by_date rg = t3c_plot (by_date rg)
+t3c_plot_by_date :: FilePath -> (String,String) -> IO ()
+t3c_plot_by_date fn rg = t3c_plot fn (by_date rg)
 
 -- | Variant of 'zip' that discards elements from the /lhs/ list that
 -- do not have a counterpart in the /rhs/ list.
@@ -257,10 +262,10 @@ zipMaybe i j =
       (_:i',Nothing:j') -> zipMaybe i' j'
       (p:p',Just q:q') -> (p,q) : zipMaybe p' q'
 
--- > tc3_plot_intervals (const True)
-tc3_plot_intervals :: (T3C -> Bool) -> IO ()
-tc3_plot_intervals p = do
-  hr <- t3c_load
+-- > t3c_plot_intervals (const True)
+t3c_plot_intervals :: FilePath -> (T3C -> Bool) -> IO ()
+t3c_plot_intervals fn p = do
+  hr <- t3c_load fn
   let hr' = filter p (sort_on time_stamp hr)
       i = map intervals hr'
       i' = map (liftM I.intervals_adjacent) i
@@ -271,8 +276,8 @@ tc3_plot_intervals p = do
                 in map (\((l,r),x) -> let x' = fromIntegral (I.interval_hr x)
                                       in [(g l,x'),(g r,x')]) y
       v = map f (zipMaybe (map time_stamp hr') i')
-      pl = mk_plot_ln (show ("I",lm_av,lm_mx)) N.red (concat v)
-  mk_chart (100,100) Nothing [pl]
+      pl = P.mk_plot_ln (show ("I",lm_av,lm_mx)) N.red (concat v)
+  P.mk_chart (100,100) Nothing [pl]
 
 -- * Chart (summary)
 
@@ -282,14 +287,14 @@ t3c_chart_summary s = do
   let un_st = snd -- (_,(i,k,j)) = (i,j,k)
       nm r f = map (normalise r . f)
       nm_tr r f = map (normalise_tr r . un_st . f)
-      ne = mk_plot_pt "n-entries" N.purple (-0.1) (nm (0,16) (fromIntegral . s_entries) s)
-      du = mk_plot_tr "dur" N.green 0.0 (nm_tr (0,10) s_dur s)
-      du_t = mk_plot_pt "dur-t" N.green 0.0 (nm (0,30) s_dur_t s)
-      ha = mk_plot_tr "hr-avg" N.blue 0.1 (nm_tr (80,hr_limit) s_t3c_avg s)
-      hm = mk_plot_tr "hr-max" N.red 0.2 (nm_tr (80,hr_limit) s_t3c_max s)
-      en = mk_plot_tr "en" N.yellow 0.3 (nm_tr (100,5000) s_en s)
-      en_t = mk_plot_pt "en-t" N.yellow 0.3 (nm (100,15000) s_en_t s)
-      te = mk_plot_tr "te" N.aqua 0.4 (nm_tr (1,5) s_te s)
-  mk_chart (1024,576) Nothing [ne,du,du_t,ha,hm,en,en_t,te]
+      ne = P.mk_plot_pt "n-entries" N.purple (-0.1) (nm (0,16) (fromIntegral . s_entries) s)
+      du = P.mk_plot_tr "dur" N.green 0.0 (nm_tr (0,10) s_dur s)
+      du_t = P.mk_plot_pt "dur-t" N.green 0.0 (nm (0,30) s_dur_t s)
+      ha = P.mk_plot_tr "hr-avg" N.blue 0.1 (nm_tr (80,hr_limit) s_t3c_avg s)
+      hm = P.mk_plot_tr "hr-max" N.red 0.2 (nm_tr (80,hr_limit) s_t3c_max s)
+      en = P.mk_plot_tr "en" N.yellow 0.3 (nm_tr (100,5000) s_en s)
+      en_t = P.mk_plot_pt "en-t" N.yellow 0.3 (nm (100,15000) s_en_t s)
+      te = P.mk_plot_tr "te" N.aqua 0.4 (nm_tr (1,5) s_te s)
+  P.mk_chart (1024,576) Nothing [ne,du,du_t,ha,hm,en,en_t,te]
 
 -- * Predicate logic
