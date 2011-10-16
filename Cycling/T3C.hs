@@ -38,24 +38,6 @@ time_stamp = time_days . date_time
 intervals :: T3C -> Maybe [I.Interval]
 intervals = I.intervals . notes
 
--- | Transform interval sequence durations into adjacent /(start,end)/
--- duples.
---
--- > intervals_adjacent [(11,157),(12,158)] == [((0,11),157),((11,23),158)]
-intervals_adjacent :: [I.Interval] -> [((Integer,Integer),Integer)]
-intervals_adjacent =
-    let f n i = case i of
-                  [] -> []
-                  (d,hr):i' -> let n' = d + n in ((n,n'),hr) : f n' i'
-    in f 0
-
--- | Parse list of 'I.Interval's from 'notes' field.
-intervals_duration :: Maybe [I.Interval] -> Integer
-intervals_duration i =
-    case i of
-      Nothing -> 0
-      Just i' -> sum (map fst i')
-
 -- * Parsing and formatting
 
 -- | Parse T3C entry
@@ -281,13 +263,13 @@ tc3_plot_intervals p = do
   hr <- t3c_load
   let hr' = filter p (sort_on time_stamp hr)
       i = map intervals hr'
-      i' = map (liftM intervals_adjacent) i
+      i' = map (liftM I.intervals_adjacent) i
       average x = fromIntegral (sum x) / fromIntegral (length x)
-      lm_mx = maximum (map intervals_duration i)
-      lm_av = average (filter (/= 0) (map intervals_duration i))
+      lm_mx = maximum (map I.intervals_duration_m i)
+      lm_av = average (filter (/= 0) (map I.intervals_duration_m i))
       f (t,y) = let g n = t + (fromIntegral n / lm_av)
-                in map (\((l,r),x) -> let x' = fromIntegral x
-                                      in [(g l,x'),(g r,x')]) y
+                in map (\((l,r),(_,x,_)) -> let x' = fromIntegral x
+                                            in [(g l,x'),(g r,x')]) y
       v = map f (zipMaybe (map time_stamp hr') i')
       pl = mk_plot_ln (show ("I",lm_av,lm_mx)) N.red (concat v)
   mk_chart (100,100) Nothing [pl]
