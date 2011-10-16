@@ -268,8 +268,8 @@ tc3_plot_intervals p = do
       lm_mx = maximum (map I.intervals_duration_m i)
       lm_av = average (filter (/= 0) (map I.intervals_duration_m i))
       f (t,y) = let g n = t + (fromIntegral n / lm_av)
-                in map (\((l,r),(_,x,_)) -> let x' = fromIntegral x
-                                            in [(g l,x'),(g r,x')]) y
+                in map (\((l,r),x) -> let x' = fromIntegral (I.interval_hr x)
+                                      in [(g l,x'),(g r,x')]) y
       v = map f (zipMaybe (map time_stamp hr') i')
       pl = mk_plot_ln (show ("I",lm_av,lm_mx)) N.red (concat v)
   mk_chart (100,100) Nothing [pl]
