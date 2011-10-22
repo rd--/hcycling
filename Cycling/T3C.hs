@@ -297,4 +297,33 @@ t3c_chart_summary s = do
       te = P.mk_plot_tr "te" N.aqua 0.4 (nm_tr (1,5) s_te s)
   P.mk_chart (1024,576) Nothing [ne,du,du_t,ha,hm,en,en_t,te]
 
--- * Predicate logic
+-- * Analysis
+
+-- | Predicate /and/.
+--
+-- > filter (odd `p_and` (> 6)) [1..10] == [7,9]
+p_and :: (t -> Bool) -> (t -> Bool) -> t -> Bool
+p_and f g x = f x && g x
+
+-- | Given field function find set of maxima.
+--
+-- > maximaBy snd (zip ['a'..] [3,6,5,6]) == [('d',6),('b',6)]
+maximaBy :: Ord b => (a -> b) -> [a] -> [a]
+maximaBy f = head .
+             groupBy ((==) `on` f) .
+             reverse .
+             sortBy (compare `on` f)
+
+
+-- | Variant of 'maximumBy' that 'compare's 'on' /field/.
+--
+-- > maximaByOn snd (zip ['a'..] [3,6,5,6]) == ('d',6)
+maximaByOn :: Ord b => (a -> b) -> [a] -> a
+maximaByOn f = maximumBy (compare `on` f)
+
+-- | Extract data given comparator /c/, sort field /s/, comparison
+-- field /f/ and comparison value /n/.
+--
+-- > extractor (>=) fst snd 4 (zip "abdc" [5,3,3,4]) == [('a',5),('c',4)]
+extractor :: Ord b => (c->c->Bool) -> (a->b) -> (a->c) -> c -> [a] -> [a]
+extractor c s f n = sort_on s . filter (\h -> (f h `c` n))
