@@ -85,6 +85,7 @@ metres_to_inches = (* 39.3700787)
 -- | Given 'Tyre' and 'Gear' calculate /gear/ in inches.
 --
 -- > gear_inches (Tyre 23 622) (Gear 48 15) == 84.15748031496064
+-- > gear_inches (Tyre 28 630) (Gear 44 16) == 74.27165354330708
 gear_inches :: Tyre -> Gear -> Double
 gear_inches t g =
     let n = 0.0254 * pi

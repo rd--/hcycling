@@ -200,9 +200,11 @@ mk_cadence_chart :: OPT -> String
 mk_cadence_chart o =
     let f = P.printf "%.1f"
         gs = mk_cadence o
-        gs' = map (\(g,c,v) -> [show g,f c,f v]) gs
+        gs' = map (\(g,c,v) -> [(show g,Just (gear_class g))
+                               ,(f c,Nothing)
+                               ,(f v,Nothing)]) gs
         fm = opt_form [("chart","cadence")] o
-    in mk_chart fm ["gear","cadence","velocity"] gs'
+    in mk_chart_c fm ["gear","cadence","velocity"] gs'
 
 cadence_tyre_opt :: OPT
 cadence_tyre_opt =
@@ -232,7 +234,7 @@ gearing_measurements_opt :: OPT
 gearing_measurements_opt =
     [("chainrings",std_chainrings)
     ,("sprockets",std_sprockets)
-    ,("iso-tyre","23-622")]
+    ,("iso-tyre","28-630")]
 
 mk_gearing_measurements :: OPT -> [(G.Gear,Double,Double)]
 mk_gearing_measurements o =
