@@ -82,6 +82,9 @@ unRl = unL
 unTY :: VAR -> G.Tyre
 unTY = G.read_iso_tyre . snd
 
+section :: [a] -> (Int,Int) -> [a]
+section xs (i,j) = take (j - i + 1) (drop i xs)
+
 {-
 show_r :: R -> String
 show_r x =
@@ -119,28 +122,30 @@ opt_form z o =
 gradient_opt :: OPT
 gradient_opt =
     [("tolerance","0.05")
-    ,("rider-weight","62")
+    ,("rider-weight {}","63.5,70")
     ,("bicycle-weight","8")
     ,("kit-weight","2")
-    ,("power","250")
-    ,("gradients","6,7,8,9,10,11,12")]
+    ,("power {}","280,320")
+    ,("gradient {}","6,7,8,9,10,11,12")]
 
-mk_gradient :: OPT -> [(R,R,R)]
+mk_gradient :: OPT -> [(R,R,R,R)]
 mk_gradient o =
-  let [t,m_r,m_b,m_k,w] = map unR (section o (0,4))
-      gs = unRl (o !! 5)
-      m = m_r + m_b + m_k
-      f g = let (v,w') = P.velocity_std t m g w
-            in (g,v,w')
-  in map f gs
+  let [t,m_b,m_k] = map unR (map (o !!) [0,2,3])
+      m_rl = unRl (o !! 1)
+      wl = unRl (o !! 4)
+      gl = unRl (o !! 5)
+      f (m_r,w,g) = let m = m_r + m_b + m_k
+                        (v,w') = P.velocity_std t m g w
+                    in (m_r,g,v,w')
+  in [f (m_r,w,g) | m_r <- m_rl, w <- wl, g <- gl]
 
 mk_gradient_chart :: OPT -> String
 mk_gradient_chart o =
     let f = P.printf "%.1f"
         gs = mk_gradient o
-        gs' = map (\(g,c,v) -> [f g,f c,f v]) gs
+        gs' = map (\(r,g,c,v) -> [f r,f g,f c,f v]) gs
         fm = opt_form [("chart","gradient")] o
-    in mk_chart fm ["gradient","velocity","power"] gs'
+    in mk_chart fm ["rider-weight","gradient","velocity","power"] gs'
 
 std_chainrings,std_sprockets :: String
 std_chainrings = "39,53"
@@ -149,14 +154,11 @@ std_sprockets = C.cassette_string (C.shimano_105_12_25::[Int])
 gearing_cadence_opt :: OPT
 gearing_cadence_opt =
     [("cadence-minima","60")
-    ,("cadence-maxima","110")
+    ,("cadence-maxima","120")
     ,("velocity","36")
-    ,("chainrings",std_chainrings)
-    ,("sprockets",std_sprockets)
+    ,("chainring {}",std_chainrings)
+    ,("sprocket {}",std_sprockets)
     ,("iso-tyre","23-622")]
-
-section :: [a] -> (Int,Int) -> [a]
-section xs (i,j) = take (j - i + 1) (drop i xs)
 
 mk_gearing_cadence :: OPT -> [(G.Gear,Double,Double)]
 mk_gearing_cadence o =
@@ -183,9 +185,9 @@ mk_gearing_cadence_chart o =
 
 cadence_opt :: OPT
 cadence_opt =
-    [("cadences","90,110")
-    ,("chainrings",std_chainrings)
-    ,("sprockets",std_sprockets)
+    [("cadence {}","90,110")
+    ,("chainring {}",std_chainrings)
+    ,("sprocket {}",std_sprockets)
     ,("iso-tyre","23-622")]
 
 mk_cadence :: OPT -> [(G.Gear,Double,Double)]
