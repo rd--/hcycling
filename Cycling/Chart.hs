@@ -228,8 +228,8 @@ cadence_tyre_opt :: OPT
 cadence_tyre_opt =
     [("cadence","90",Unit)
     ,("chainring","53",Unit)
-    ,("sprockets","16",Unit)
-    ,("iso-tyres","23-622,25-622,28-622",List)]
+    ,("sprocket","16",List)
+    ,("iso-tyre","23-622,25-622,28-622",List)]
 
 mk_cadence_tyre :: OPT -> [(G.Tyre,Double)]
 mk_cadence_tyre o =
@@ -250,8 +250,8 @@ mk_cadence_tyre_chart o =
 
 gearing_measurements_opt :: OPT
 gearing_measurements_opt =
-    [("chainrings",std_chainrings,List)
-    ,("sprockets",std_sprockets,List)
+    [("chainring",std_chainrings,List)
+    ,("sprocket",std_sprockets,List)
     ,("iso-tyre","28-630",Unit)]
 
 mk_gearing_measurements :: OPT -> [(G.Gear,Double,Double)]
@@ -296,7 +296,7 @@ mk_vam_chart o =
 avg_vel_opt :: OPT
 avg_vel_opt =
     [("distance","30.0",Unit)
-    ,("times","0:30:00.00",Unit)]
+    ,("time","0:30:00.00",List)]
 
 mk_avg_vel :: OPT -> [(T.Duration,Double)]
 mk_avg_vel o =
