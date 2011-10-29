@@ -50,8 +50,12 @@ mk_chart :: X.Content -> [String] -> [[String]] -> String
 mk_chart fm t = mk_chart_c fm t . map (map (\e -> (e,Nothing)))
 
 type R = Double
-type VAR = (String,String)
+data Mode = Unit | List
+type VAR = (String,String,Mode)
 type OPT = [VAR]
+
+var_n :: VAR -> String
+var_n (_,n,_) = n
 
 read_maybe :: (Read a) => String -> Maybe a
 read_maybe s =
@@ -63,7 +67,7 @@ read_r :: String -> R
 read_r x = maybe 0.0 id (read_maybe x)
 
 unR :: VAR -> R
-unR = read_r . snd
+unR = read_r . var_n
 
 unI :: VAR -> Int
 unI = floor . unR
@@ -74,13 +78,13 @@ read_l s =
     in M.mapMaybe read_maybe xs
 
 unL :: Read a => VAR -> [a]
-unL = read_l . snd
+unL = read_l . var_n
 
 unRl :: VAR -> [R]
 unRl = unL
 
 unTY :: VAR -> G.Tyre
-unTY = G.read_iso_tyre . snd
+unTY = G.read_iso_tyre . var_n
 
 section :: [a] -> (Int,Int) -> [a]
 section xs (i,j) = take (j - i + 1) (drop i xs)
@@ -95,17 +99,29 @@ show_l :: [R] -> String
 show_l xs = "[" ++ L.intercalate "," (map show_r xs) ++ "]"
 -}
 
-opt_form :: [(String,String)] -> OPT -> X.Content
+mode_str :: Mode -> String
+mode_str m =
+    case m of
+      Unit -> ""
+      List -> "{}"
+
+append_mode_str :: String -> Mode -> String
+append_mode_str s m =
+    case mode_str m of
+      [] -> s
+      m' -> s ++ " " ++ m'
+
+opt_form :: (String,String) -> OPT -> X.Content
 opt_form z o =
     let mk_h (k,v) = H.input [H.type' "hidden"
                              ,H.name k
                              ,H.value v]
-        mk_s (k,v) =
+        mk_s (k,v,m) =
             H.dl
              []
              [H.dt
               [H.class' "key"]
-              [H.cdata k]
+              [H.cdata (append_mode_str k m)]
              ,H.dd
               []
               [H.input
@@ -117,16 +133,16 @@ opt_form z o =
                      ,H.value "calculate"]
     in H.form
          [H.action "./",H.method "get"]
-         (map mk_h z ++ map mk_s o ++ [sb])
+         (mk_h z : map mk_s o ++ [sb])
 
 gradient_opt :: OPT
 gradient_opt =
-    [("tolerance","0.05")
-    ,("rider-weight {}","63.5,70")
-    ,("bicycle-weight","8")
-    ,("kit-weight","2")
-    ,("power {}","280,320")
-    ,("gradient {}","6,7,8,9,10,11,12")]
+    [("tolerance","0.05",Unit)
+    ,("rider-weight","63.5,70",List)
+    ,("bicycle-weight","8",Unit)
+    ,("kit-weight","2",Unit)
+    ,("power","280,320",List)
+    ,("gradient","6,7,8,9,10,11,12",List)]
 
 mk_gradient :: OPT -> [(R,R,R,R)]
 mk_gradient o =
@@ -144,7 +160,7 @@ mk_gradient_chart o =
     let f = P.printf "%.1f"
         gs = mk_gradient o
         gs' = map (\(r,g,c,v) -> [f r,f g,f c,f v]) gs
-        fm = opt_form [("chart","gradient")] o
+        fm = opt_form ("chart","gradient") o
     in mk_chart fm ["rider-weight","gradient","velocity","power"] gs'
 
 std_chainrings,std_sprockets :: String
@@ -153,12 +169,12 @@ std_sprockets = C.cassette_string (C.shimano_105_12_25::[Int])
 
 gearing_cadence_opt :: OPT
 gearing_cadence_opt =
-    [("cadence-minima","60")
-    ,("cadence-maxima","120")
-    ,("velocity","36")
-    ,("chainring {}",std_chainrings)
-    ,("sprocket {}",std_sprockets)
-    ,("iso-tyre","23-622")]
+    [("cadence-minima","60",Unit)
+    ,("cadence-maxima","120",Unit)
+    ,("velocity","36",Unit)
+    ,("chainring",std_chainrings,List)
+    ,("sprocket",std_sprockets,List)
+    ,("iso-tyre","23-622",Unit)]
 
 mk_gearing_cadence :: OPT -> [(G.Gear,Double,Double)]
 mk_gearing_cadence o =
@@ -180,15 +196,15 @@ mk_gearing_cadence_chart o =
         gs' = map (\(g,c,v) -> [(show g,Just (gear_class g))
                                ,(f c,Nothing)
                                ,(f v,Nothing)]) gs
-        fm = opt_form [("chart","gearing-cadence")] o
+        fm = opt_form ("chart","gearing-cadence") o
     in mk_chart_c fm ["gear","cadence","velocity"] gs'
 
 cadence_opt :: OPT
 cadence_opt =
-    [("cadence {}","90,110")
-    ,("chainring {}",std_chainrings)
-    ,("sprocket {}",std_sprockets)
-    ,("iso-tyre","23-622")]
+    [("cadence","90,110",List)
+    ,("chainring",std_chainrings,List)
+    ,("sprocket",std_sprockets,List)
+    ,("iso-tyre","23-622",Unit)]
 
 mk_cadence :: OPT -> [(G.Gear,Double,Double)]
 mk_cadence o =
@@ -205,15 +221,15 @@ mk_cadence_chart o =
         gs' = map (\(g,c,v) -> [(show g,Just (gear_class g))
                                ,(f c,Nothing)
                                ,(f v,Nothing)]) gs
-        fm = opt_form [("chart","cadence")] o
+        fm = opt_form ("chart","cadence") o
     in mk_chart_c fm ["gear","cadence","velocity"] gs'
 
 cadence_tyre_opt :: OPT
 cadence_tyre_opt =
-    [("cadence","90")
-    ,("chainring","53")
-    ,("sprockets","16")
-    ,("iso-tyres","23-622,25-622,28-622")]
+    [("cadence","90",Unit)
+    ,("chainring","53",Unit)
+    ,("sprockets","16",Unit)
+    ,("iso-tyres","23-622,25-622,28-622",List)]
 
 mk_cadence_tyre :: OPT -> [(G.Tyre,Double)]
 mk_cadence_tyre o =
@@ -229,14 +245,14 @@ mk_cadence_tyre_chart o =
     let f = P.printf "%.1f"
         r = mk_cadence_tyre o
         r' = map (\(t,v) -> [show t,f v]) r
-        fm = opt_form [("chart","cadence-tyre")] o
+        fm = opt_form ("chart","cadence-tyre") o
     in mk_chart fm ["tyre","velocity"] r'
 
 gearing_measurements_opt :: OPT
 gearing_measurements_opt =
-    [("chainrings",std_chainrings)
-    ,("sprockets",std_sprockets)
-    ,("iso-tyre","28-630")]
+    [("chainrings",std_chainrings,List)
+    ,("sprockets",std_sprockets,List)
+    ,("iso-tyre","28-630",Unit)]
 
 mk_gearing_measurements :: OPT -> [(G.Gear,Double,Double)]
 mk_gearing_measurements o =
@@ -253,15 +269,15 @@ mk_gearing_measurements_chart o =
         gs' = map (\(g,c,v) -> [(show g,Just (gear_class g))
                                ,(f c,Nothing)
                                ,(f v,Nothing)]) gs
-        fm = opt_form [("chart","gearing-measurements")] o
+        fm = opt_form ("chart","gearing-measurements") o
     in mk_chart_c fm ["gear","cm","in"] gs'
 
 vam_opt :: OPT
 vam_opt =
-    [("vertical-ascension","600")
-    ,("time","20")
-    ,("average-gradient","8")
-    ,("starting-altitude","0")]
+    [("vertical-ascension","600",Unit)
+    ,("time","20",Unit)
+    ,("average-gradient","8",Unit)
+    ,("starting-altitude","0",Unit)]
 
 mk_vam :: OPT -> (Double,Double)
 mk_vam o =
@@ -274,17 +290,17 @@ mk_vam_chart :: OPT -> String
 mk_vam_chart o =
     let f = P.printf "%.1f"
         (vmh,wkg) = mk_vam o
-        fm = opt_form [("chart","velocita-ascensionale-media")] o
+        fm = opt_form ("chart","velocita-ascensionale-media") o
     in mk_chart fm ["vm/h","watts/kg"] [[f vmh,f wkg]]
 
 avg_vel_opt :: OPT
 avg_vel_opt =
-    [("distance","30.0")
-    ,("times","0:30:00.00")]
+    [("distance","30.0",Unit)
+    ,("times","0:30:00.00",Unit)]
 
 mk_avg_vel :: OPT -> [(T.Duration,Double)]
 mk_avg_vel o =
-  let ds = read (snd (o !! 0))
+  let ds = read (var_n (o !! 0))
       ts = unL (o !! 1)
       ks = map (V.kph ds) ts
   in zip ts ks
@@ -293,7 +309,7 @@ mk_avg_vel_chart :: OPT -> String
 mk_avg_vel_chart o =
     let f = P.printf "%.1f"
         tv = mk_avg_vel o
-        fm = opt_form [("chart","average-velocity")] o
+        fm = opt_form ("chart","average-velocity") o
         g (t,v) = [show t,f v,f (V.kph_to_mph v)]
     in mk_chart fm ["tm","kph","mph"] (map g tv)
 
