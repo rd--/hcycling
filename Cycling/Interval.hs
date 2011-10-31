@@ -2,6 +2,7 @@
 module Cycling.Interval where
 
 import Control.Monad
+import Data.Maybe
 import Text.Parsers.Frisby {- frisby -}
 
 -- | An 'Interval' is a /duration/, an /average heart rate/ and perhaps a /cadence/.
@@ -10,8 +11,16 @@ data Interval = Interval {interval_duration :: Integer
                          ,interval_cadence :: Maybe Integer}
               deriving (Eq)
 
+-- | Pretty print 'Interval'.  This is the 'Show' instance.
+--
+-- > intervalPP (Interval 30 160 (Just 90)) == "30@160^90"
+intervalPP :: Interval -> String
+intervalPP (Interval d hr c) =
+    let c' = maybe "" (('^' :) . show) c
+    in show d ++ "@" ++ show hr ++ c'
+
 instance Show Interval where
-    show (Interval d hr c) = show d ++ "@" ++ show hr ++ (maybe "" (\c' -> "^" ++ show c') c)
+    show = intervalPP
 
 -- | Parse an 'Integer'
 --
@@ -108,4 +117,4 @@ intervals_duration = sum . map interval_duration
 --
 -- > intervals_duration_m Nothing == 0
 intervals_duration_m :: Maybe [Interval] -> Integer
-intervals_duration_m = maybe 0 id . liftM intervals_duration
+intervals_duration_m = fromMaybe 0 . liftM intervals_duration

@@ -87,27 +87,27 @@ t3c_load fn = do
 
 -- * Selection functions (t3c predicates)
 
-t3c_date_cmp_p :: (Day -> Day -> Bool) -> UTCTime -> (T3C -> Bool)
+t3c_date_cmp_p :: (Day -> Day -> Bool) -> UTCTime -> T3C -> Bool
 t3c_date_cmp_p f d i =
     let i' = utctDay (date_time i)
     in i' `f` utctDay d
 
-t3c_date_after_p :: UTCTime -> (T3C -> Bool)
-t3c_date_after_p d = t3c_date_cmp_p (>=) d
+t3c_date_after_p :: UTCTime -> T3C -> Bool
+t3c_date_after_p = t3c_date_cmp_p (>=)
 
-t3c_date_before_p :: UTCTime -> (T3C -> Bool)
-t3c_date_before_p d = t3c_date_cmp_p (<=) d
+t3c_date_before_p :: UTCTime -> T3C -> Bool
+t3c_date_before_p = t3c_date_cmp_p (<=)
 
-t3c_date_within_p :: (UTCTime,UTCTime) -> (T3C -> Bool)
+t3c_date_within_p :: (UTCTime,UTCTime) -> T3C -> Bool
 t3c_date_within_p (l,r) i = t3c_date_after_p l i && t3c_date_before_p r i
 
 t3c_week_starting :: UTCTime -> T3C -> Bool
 t3c_week_starting t = t3c_date_within_p (t,add_days 6 t)
 
-t3c_note_includes_p :: String -> (T3C -> Bool)
+t3c_note_includes_p :: String -> T3C -> Bool
 t3c_note_includes_p n i = n `isInfixOf` notes i
 
-by_date :: (String,String) -> (T3C -> Bool)
+by_date :: (String,String) -> T3C -> Bool
 by_date (l,r) = t3c_date_within_p (parse_date l,parse_date r)
 
 week_starting :: String -> T3C -> Bool
@@ -142,7 +142,7 @@ stat_map f (x,(s1,s2,s3)) = (x,(f s1,f s2,f s3))
 -- * IO interaction
 
 with_hr :: FilePath -> ([T3C] -> a) -> IO a
-with_hr fn f = t3c_load fn >>= return.f
+with_hr fn f = fmap f (t3c_load fn)
 
 with_t3c_io :: FilePath -> ([T3C] -> IO a) -> IO a
 with_t3c_io fn = join . with_hr fn
@@ -222,7 +222,7 @@ t3c_chart fx r = do
       e = nm (0,5000) (map energy r)
       t = nm (1,5) (map training_effect r)
   print (mk_summary r)
-  C.plotWindow (map fx (zip [0..] r))
+  C.plotWindow (zipWith (curry fx) [0..] r)
        a (hr_range_txt "avg" hr_limit) C.Plus -- C.Solid
        m (hr_range_txt "max" hr_limit) C.Plus -- C.Solid
        d "dur (0-10)" C.HollowCircle -- C.Solid
@@ -326,4 +326,4 @@ maximaByOn f = maximumBy (compare `on` f)
 --
 -- > extractor (>=) fst snd 4 (zip "abdc" [5,3,3,4]) == [('a',5),('c',4)]
 extractor :: Ord b => (c->c->Bool) -> (a->b) -> (a->c) -> c -> [a] -> [a]
-extractor c s f n = sort_on s . filter (\h -> (f h `c` n))
+extractor c s f n = sort_on s . filter (\h -> f h `c` n)

@@ -64,7 +64,7 @@ read_maybe s =
       _ -> Nothing
 
 read_r :: String -> R
-read_r x = maybe 0.0 id (read_maybe x)
+read_r x = M.fromMaybe 0.0 (read_maybe x)
 
 unR :: VAR -> R
 unR = read_r . var_n
@@ -146,7 +146,7 @@ gradient_opt =
 
 mk_gradient :: OPT -> [(R,R,R,R)]
 mk_gradient o =
-  let [t,m_b,m_k] = map unR (map (o !!) [0,2,3])
+  let [t,m_b,m_k] = map (unR . (o !!)) [0,2,3]
       m_rl = unRl (o !! 1)
       wl = unRl (o !! 4)
       gl = unRl (o !! 5)

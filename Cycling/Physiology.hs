@@ -130,5 +130,5 @@ bmr_mifflin_1990 w h a g =
         a' = 5 * a
         g' = case g of
                Male -> 5
-               Female -> (-161)
+               Female -> -161
     in w' + h' + a' + g'

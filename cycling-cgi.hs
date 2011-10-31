@@ -58,5 +58,4 @@ cgi_main l = do
   dispatch l method (U.pairs q)
 
 main :: IO ()
-main = do
-  runCGI (handleErrors (cgi_main ()))
+main = runCGI (handleErrors (cgi_main ()))

@@ -19,4 +19,4 @@ shimano_105_12_27 = [12,13,14,15,16,17,19,21,24,27]
 --
 -- > cassette_string shimano_105_11_23 == "11,12,13,14,15,16,17,19,21,23"
 cassette_string :: Integral i => [i] -> String
-cassette_string = concat . intersperse "," . map show
+cassette_string = intercalate "," . map show

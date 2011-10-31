@@ -89,4 +89,4 @@ metres_to_inches = (* 39.3700787)
 gear_inches :: Tyre -> Gear -> Double
 gear_inches t g =
     let n = 0.0254 * pi
-    in (gear_metres t g) / n
+    in gear_metres t g / n
