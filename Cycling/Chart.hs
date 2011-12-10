@@ -24,14 +24,14 @@ import qualified Cycling.VAM as VAM
 import qualified Cycling.Velocity as V
 
 std_html_attr :: [X.Attr]
-std_html_attr = [H.xmlns "http://www.w3.org/1999/xhtml"
-                ,H.xml_lang "en"
-                ,H.lang "en" ]
+std_html_attr = [H.lang "en" ]
 
-css :: X.Content
-css = H.link [H.rel "stylesheet"
-             ,H.type' "text/css"
-             ,H.href "css/cycling.css"]
+std_meta :: [X.Content]
+std_meta =
+    [H.title [] [H.cdata "cycling"]
+    ,H.meta [H.name "author",H.content "rohan drape"]
+    ,H.meta [H.http_equiv "content-type",H.content "text/html; charset=UTF-8"]
+    ,H.link [H.rel "stylesheet",H.type' "text/css",H.href "css/cycling.css"]]
 
 mk_chart_c :: X.Content -> [String] -> [[(String,Maybe String)]] -> String
 mk_chart_c fm t g =
@@ -41,10 +41,10 @@ mk_chart_c fm t g =
                       in H.td a [H.cdata e]
         mk_tr xs = H.tr [] (map mk_cl xs)
         th = H.tr [] (map (\x -> H.th [] [H.cdata x]) t)
-        hd = H.head [] [H.title [] [H.cdata "cycling"],css]
+        hd = H.head [] std_meta
         bd = H.body [] [fm,H.table [] (th : map mk_tr g)]
         h = H.html std_html_attr [hd,bd]
-    in H.renderXHTML H.xhtml_1_0_strict h
+    in H.renderHTML5 h
 
 mk_chart :: X.Content -> [String] -> [[String]] -> String
 mk_chart fm t = mk_chart_c fm t . map (map (\e -> (e,Nothing)))
@@ -323,7 +323,7 @@ mk_index =
                     ,"velocita-ascensionale-media"
                     ,"average-velocity"]
         mk_ln c = H.li [] [H.a [H.href ("?chart="++c)] [H.cdata c]]
-        hd = H.head [] [H.title [] [H.cdata "cycling"],css]
+        hd = H.head [] std_meta
         bd = H.body [] [H.ul [] (map mk_ln cs)]
         h = H.html std_html_attr [hd,bd]
-    in H.renderXHTML H.xhtml_1_0_strict h
+    in H.renderHTML5 h
