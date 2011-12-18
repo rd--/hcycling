@@ -14,7 +14,8 @@ data-files:        README
 
 library
   build-depends:   base == 4.*,
-                   cmath,csv,
+                   cmath,
+                   csv,
                    frisby,
                    html-minimalist,
                    old-locale,
