@@ -2,17 +2,14 @@
 module Cycling.T3C where
 
 import Control.Monad
-import qualified Data.Colour.Names as N {- colour -}
 import Data.Function
 import Data.List
 import Data.Maybe
 import Data.Time {- time -}
-import qualified Graphics.Rendering.Chart.Simple as C {- chart -}
 import Text.CSV {- csv -}
 import Text.Printf
 
 import qualified Cycling.Interval as I
-import qualified Cycling.Plot as P
 import Cycling.Time
 
 -- * T3C data type
@@ -197,7 +194,7 @@ weekly_summary_from t r =
 weekly_summary_from' :: String -> [T3C] -> [Summary]
 weekly_summary_from' t = weekly_summary_from (parse_date t)
 
--- * Chart
+-- * Chart utilities
 
 normalise :: (Fractional a) => (a,a) -> a -> a
 normalise (l,r) x =
@@ -213,42 +210,11 @@ hr_limit = 186
 hr_range_txt :: String -> R -> String
 hr_range_txt x n = printf "hr-%s (0-%d)" x (floor n :: Int)
 
-t3c_chart :: ((Int,T3C) -> R) -> [T3C] -> IO ()
-t3c_chart fx r = do
-  let nm rng = map (normalise rng)
-      a = nm (0,hr_limit) (map hr_average r)
-      m = nm (0,hr_limit) (map hr_maximum r)
-      d = nm (0,10) (map (diff_time_hours . duration) r)
-      e = nm (0,5000) (map energy r)
-      t = nm (1,5) (map training_effect r)
-  print (mk_summary r)
-  C.plotWindow (zipWith (curry fx) [0..] r)
-       a (hr_range_txt "avg" hr_limit) C.Plus -- C.Solid
-       m (hr_range_txt "max" hr_limit) C.Plus -- C.Solid
-       d "dur (0-10)" C.HollowCircle -- C.Solid
-       e "energy (0-5000)" C.Triangle -- C.Solid
-       t "te (1-5)" C.DownTriangle -- C.Solid
-
 -- | Variant that 'sort's on 'Ord' value extracted by /f/.
 --
 -- > sort_on snd [('a',1),('b',0)] == [('b',0),('a',1)]
 sort_on :: (Ord b) => (a -> b) -> [a] -> [a]
 sort_on = sortBy . on compare
-
-t3c_plot :: FilePath -> (T3C -> Bool) -> IO ()
-t3c_plot fn p = do
-  r <- t3c_load fn
-  let r' = filter p (sort_on time_stamp r)
-  t3c_chart (time_stamp . snd) r'
-
-t3c_plot_sort :: (Ord a) => FilePath -> (T3C -> Bool) -> (T3C -> a) -> IO ()
-t3c_plot_sort fn p cmp = do
-  r <- t3c_load fn
-  let r' = filter p (sort_on cmp r)
-  t3c_chart (fromIntegral . fst) r'
-
-t3c_plot_by_date :: FilePath -> (String,String) -> IO ()
-t3c_plot_by_date fn rg = t3c_plot fn (by_date rg)
 
 -- | Variant of 'zip' that discards elements from the /lhs/ list that
 -- do not have a counterpart in the /rhs/ list.
@@ -261,41 +227,6 @@ zipMaybe i j =
       (_,[]) -> []
       (_:i',Nothing:j') -> zipMaybe i' j'
       (p:p',Just q:q') -> (p,q) : zipMaybe p' q'
-
--- > t3c_plot_intervals (const True)
-t3c_plot_intervals :: FilePath -> (T3C -> Bool) -> IO ()
-t3c_plot_intervals fn p = do
-  hr <- t3c_load fn
-  let hr' = filter p (sort_on time_stamp hr)
-      i = map intervals hr'
-      i' = map (liftM I.intervals_adjacent) i
-      average x = fromIntegral (sum x) / fromIntegral (length x)
-      lm_mx = maximum (map I.intervals_duration_m i)
-      lm_av = average (filter (/= 0) (map I.intervals_duration_m i))
-      f (t,y) = let g n = t + (fromIntegral n / lm_av)
-                in map (\((l,r),x) -> let x' = fromIntegral (I.interval_hr x)
-                                      in [(g l,x'),(g r,x')]) y
-      v = map f (zipMaybe (map time_stamp hr') i')
-      pl = P.mk_plot_ln (show ("I",lm_av,lm_mx)) N.red (concat v)
-  P.mk_chart (100,100) Nothing [pl]
-
--- * Chart (summary)
-
--- Just "hr-chart-summary.pdf"
-t3c_chart_summary :: [Summary] -> IO ()
-t3c_chart_summary s = do
-  let un_st = snd -- (_,(i,k,j)) = (i,j,k)
-      nm r f = map (normalise r . f)
-      nm_tr r f = map (normalise_tr r . un_st . f)
-      ne = P.mk_plot_pt "n-entries" N.purple (-0.1) (nm (0,16) (fromIntegral . s_entries) s)
-      du = P.mk_plot_tr "dur" N.green 0.0 (nm_tr (0,10) s_dur s)
-      du_t = P.mk_plot_pt "dur-t" N.green 0.0 (nm (0,30) s_dur_t s)
-      ha = P.mk_plot_tr "hr-avg" N.blue 0.1 (nm_tr (80,hr_limit) s_t3c_avg s)
-      hm = P.mk_plot_tr "hr-max" N.red 0.2 (nm_tr (80,hr_limit) s_t3c_max s)
-      en = P.mk_plot_tr "en" N.yellow 0.3 (nm_tr (100,5000) s_en s)
-      en_t = P.mk_plot_pt "en-t" N.yellow 0.3 (nm (100,15000) s_en_t s)
-      te = P.mk_plot_tr "te" N.aqua 0.4 (nm_tr (1,5) s_te s)
-  P.mk_chart (1024,576) Nothing [ne,du,du_t,ha,hm,en,en_t,te]
 
 -- * Analysis
 

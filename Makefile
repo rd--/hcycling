@@ -9,6 +9,7 @@ all-ghc:
 
 clean:
 	rm -f */*.o */*.hi *.o *.hi
+	rm -Rf dist
 
 clean-all:
 	rm -f index.cgi

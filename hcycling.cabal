@@ -14,7 +14,7 @@ data-files:        README
 
 library
   build-depends:   base == 4.*,
-                   Chart,cmath,colour,csv,
+                   cmath,csv,
                    frisby,
                    html-minimalist,
                    old-locale,
@@ -27,7 +27,6 @@ library
                    Cycling.Gearing
                    Cycling.Interval
                    Cycling.Physiology
-                   Cycling.Plot
                    Cycling.Power
                    Cycling.Solve
                    Cycling.T3C
