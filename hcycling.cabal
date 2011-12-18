@@ -23,7 +23,8 @@ library
                    time,
                    xml
   ghc-options:     -Wall -fwarn-tabs
-  exposed-modules: Cycling.Cassette
+  exposed-modules: Cycling.Analysis
+                   Cycling.Cassette
                    Cycling.Chart
                    Cycling.Gearing
                    Cycling.Interval
