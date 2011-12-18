@@ -39,6 +39,12 @@ mpm_to_kph x = (x * 60) / 1000
 kph_to_mps :: (Fractional a) => a -> a
 kph_to_mps x = (x * 1000) / (60 * 60)
 
+-- | Convert from metres per second (mps) to kilometres per hour (kph).
+--
+-- > mps_to_kph 12.5 == 45
+mps_to_kph :: Fractional a => a -> a
+mps_to_kph n = (n * 60 * 60) / 1000
+
 -- | Conversion factor from nautical miles to kilometers.
 nautical_mile :: Fractional t => t
 nautical_mile = 1.852
