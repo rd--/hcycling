@@ -10,8 +10,12 @@ type R = Double
 
 -- * Statistics
 
+-- | Simple (minima,maxima,average) statistics.
 type Stat n = (String,(n,n,n))
 
+-- | Generate 'Stat' for given data.
+--
+-- > stat_m "x" Just [0..10] == ("x",(0.0,10.0,5.0))
 stat_m :: String -> (a -> Maybe R) -> [a] -> Stat R
 stat_m tx fn xs =
     let xs' = mapMaybe fn xs
@@ -20,29 +24,38 @@ stat_m tx fn xs =
         av = sum xs' / fromIntegral (length xs')
     in (tx,(mn,mx,av))
 
--- | Non-maybe variant
+-- | Non-maybe variant of 'stat_m'.
 stat :: String -> (b -> R) -> [b] -> Stat R
 stat tx fn = stat_m tx (Just . fn)
 
--- | non-zero filter variant
+-- | Non-zero filter variant of 'stat_m'.
 stat_nz :: R -> String -> (b -> R) -> [b] -> Stat R
 stat_nz z tx fn =
     let fn' i = let i' = fn i
                 in if i' == z then Nothing else Just i'
     in stat_m tx fn'
 
+-- | Apply function at each node of 'Stat'.
+--
+-- > stat_map negate ("x",(0,10,5)) == ("x",(-0,-10,-5))
 stat_map :: (a -> b) -> Stat a -> Stat b
 stat_map f (x,(s1,s2,s3)) = (x,(f s1,f s2,f s3))
 
 -- * Chart utilities
 
+-- | Normalise data to @(0,1)@ over @(left,right)@ pair.
+--
+-- > normalise (0,10) 5 == 0.5
 normalise :: (Fractional a) => (a,a) -> a -> a
 normalise (l,r) x =
     let i = r - l
     in (x - l) / i
 
+-- | Triple variant of 'normalise'.
+--
+-- > normalise_tr (0,10) (0,5,10) == (0,0.5,1)
 normalise_tr :: (Fractional a) => (a,a) -> (a,a,a) -> (a,a,a)
-normalise_tr r (x,z,y) = let f = normalise r in (f x,f y,f z)
+normalise_tr r (x,y,z) = let f = normalise r in (f x,f y,f z)
 
 -- | Variant that 'sort's on 'Ord' value extracted by /f/.
 --
@@ -78,7 +91,6 @@ maximaBy f = head .
              groupBy ((==) `on` f) .
              reverse .
              sortBy (compare `on` f)
-
 
 -- | Variant of 'maximumBy' that 'compare's 'on' /field/.
 --
