@@ -57,11 +57,25 @@ normalise (l,r) x =
     let i = r - l
     in (x - l) / i
 
+-- | Variant of 'normalise' over 'Maybe'.
+--
+-- > map (normalise_m (0,10)) [Just 5,Nothing] == [Just 0.5,Nothing]
+normalise_m :: (Fractional a) => (a,a) -> Maybe a -> Maybe a
+normalise_m r = fmap (normalise r)
+
 -- | Normalise to range of input.
 --
 -- > normalise_r [0,10,5] == [0,1,0.5]
 normalise_r :: (Ord a,Fractional a) => [a] -> [a]
 normalise_r l = map (normalise (minimum_maximum l)) l
+
+-- | Variant of 'normalise_r' over 'Maybe'.
+--
+-- > normalise_r_m [Just 0,Nothing,Just 10] == [Just 0,Nothing,Just 1]
+normalise_r_m :: (Ord a, Fractional a) => [Maybe a] -> [Maybe a]
+normalise_r_m l =
+    let mm = minimum_maximum (catMaybes l)
+    in map (normalise_m mm) l
 
 -- | Triple variant of 'normalise'.
 --
