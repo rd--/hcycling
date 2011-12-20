@@ -43,6 +43,12 @@ stat_map f (x,(s1,s2,s3)) = (x,(f s1,f s2,f s3))
 
 -- * Chart utilities
 
+-- | Compute 'minimum' and 'maximum' of input.
+--
+-- > minimum_maximum [1..10] == (1,10)
+minimum_maximum :: Ord t => [t] -> (t,t)
+minimum_maximum l = (minimum l,maximum l)
+
 -- | Normalise data to @(0,1)@ over @(left,right)@ pair.
 --
 -- > normalise (0,10) 5 == 0.5
@@ -50,6 +56,12 @@ normalise :: (Fractional a) => (a,a) -> a -> a
 normalise (l,r) x =
     let i = r - l
     in (x - l) / i
+
+-- | Normalise to range of input.
+--
+-- > normalise_r [0,10,5] == [0,1,0.5]
+normalise_r :: (Ord a,Fractional a) => [a] -> [a]
+normalise_r l = map (normalise (minimum_maximum l)) l
 
 -- | Triple variant of 'normalise'.
 --
