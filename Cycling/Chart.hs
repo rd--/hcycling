@@ -14,6 +14,7 @@ import qualified Data.List.Split as S
 import qualified Data.Maybe as M
 import qualified Text.Printf as P
 import qualified Text.HTML.Light as H
+import qualified Text.HTML.Light.Common as H
 import qualified Text.XML.Light as X
 
 import qualified Cycling.Cassette as C
@@ -26,28 +27,13 @@ import qualified Cycling.Velocity as V
 std_html_attr :: [X.Attr]
 std_html_attr = [H.lang "en" ]
 
-meta_content_type :: String -> X.Content
-meta_content_type t = H.meta [H.http_equiv "content-type",H.content t]
-
-meta_author :: String -> X.Content
-meta_author a = H.meta [H.name "author",H.content a]
-
-link_css :: String -> String -> X.Content
-link_css m c = H.link [H.rel "stylesheet"
-                      ,H.type' "text/css"
-                      ,H.media m
-                      ,H.href c]
-
-meta_viewport :: String -> X.Content
-meta_viewport v = H.meta [H.name "viewport",H.content v]
-
 std_meta :: [X.Content]
 std_meta =
     [H.title [] [H.cdata "cycling"]
-    ,meta_author "rohan drape"
-    ,meta_content_type "text/html; charset=UTF-8"
-    ,meta_viewport "width=device-width,initial-scale=1.0,user-scalable=yes"
-    ,link_css "all" "css/cycling.css"]
+    ,H.meta_author "rohan drape"
+    ,H.meta_content_type "text/html; charset=UTF-8"
+    ,H.meta_viewport "width=device-width,initial-scale=1,user-scalable=yes"
+    ,H.link_css "all" "css/cycling.css"]
 
 mk_chart_c :: X.Content -> [String] -> [[(String,Maybe String)]] -> String
 mk_chart_c fm t g =
