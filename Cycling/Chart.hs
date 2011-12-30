@@ -26,12 +26,28 @@ import qualified Cycling.Velocity as V
 std_html_attr :: [X.Attr]
 std_html_attr = [H.lang "en" ]
 
+meta_content_type :: String -> X.Content
+meta_content_type t = H.meta [H.http_equiv "content-type",H.content t]
+
+meta_author :: String -> X.Content
+meta_author a = H.meta [H.name "author",H.content a]
+
+link_css :: String -> String -> X.Content
+link_css m c = H.link [H.rel "stylesheet"
+                      ,H.type' "text/css"
+                      ,H.media m
+                      ,H.href c]
+
+meta_viewport :: String -> X.Content
+meta_viewport v = H.meta [H.name "viewport",H.content v]
+
 std_meta :: [X.Content]
 std_meta =
     [H.title [] [H.cdata "cycling"]
-    ,H.meta [H.name "author",H.content "rohan drape"]
-    ,H.meta [H.http_equiv "content-type",H.content "text/html; charset=UTF-8"]
-    ,H.link [H.rel "stylesheet",H.type' "text/css",H.href "css/cycling.css"]]
+    ,meta_author "rohan drape"
+    ,meta_content_type "text/html; charset=UTF-8"
+    ,meta_viewport "width=device-width,initial-scale=1.0,user-scalable=yes"
+    ,link_css "all" "css/cycling.css"]
 
 mk_chart_c :: X.Content -> [String] -> [[(String,Maybe String)]] -> String
 mk_chart_c fm t g =
@@ -42,7 +58,7 @@ mk_chart_c fm t g =
         mk_tr xs = H.tr [] (map mk_cl xs)
         th = H.tr [] (map (\x -> H.th [] [H.cdata x]) t)
         hd = H.head [] std_meta
-        bd = H.body [] [fm,H.table [] (th : map mk_tr g)]
+        bd = H.body [] [fm,H.table [H.class' "result"] (th : map mk_tr g)]
         h = H.html std_html_attr [hd,bd]
     in H.renderHTML5 h
 
@@ -117,23 +133,19 @@ opt_form z o =
                              ,H.name k
                              ,H.value v]
         mk_s (k,v,m) =
-            H.dl
-             []
-             [H.dt
-              [H.class' "key"]
-              [H.cdata (append_mode_str k m)]
-             ,H.dd
-              []
-              [H.input
-               [H.type' "text"
-               ,H.name k
-               ,H.value v]]]
+            H.tr [] [H.td [H.class' "key"]
+                          [H.cdata (append_mode_str k m)]
+                    ,H.td []
+                          [H.input
+                                [H.type' "text"
+                                ,H.name k
+                                ,H.value v]]]
         sb = H.input [H.class' "submit"
                      ,H.type' "submit"
                      ,H.value "calculate"]
     in H.form
          [H.action "./",H.method "get"]
-         (mk_h z : map mk_s o ++ [sb])
+         (mk_h z : H.table [H.class' "opt-form"] (map mk_s o) : [sb])
 
 gradient_opt :: OPT
 gradient_opt =
