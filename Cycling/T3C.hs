@@ -89,14 +89,16 @@ t3c_date_cmp_p f d i =
     let i' = utctDay (date_time i)
     in i' `f` utctDay d
 
-t3c_date_after_p :: UTCTime -> T3C -> Bool
-t3c_date_after_p = t3c_date_cmp_p (>=)
+t3c_date_on_or_after_p :: UTCTime -> T3C -> Bool
+t3c_date_on_or_after_p = t3c_date_cmp_p (>=)
 
-t3c_date_before_p :: UTCTime -> T3C -> Bool
-t3c_date_before_p = t3c_date_cmp_p (<=)
+t3c_date_on_or_before_p :: UTCTime -> T3C -> Bool
+t3c_date_on_or_before_p = t3c_date_cmp_p (<=)
 
 t3c_date_within_p :: (UTCTime,UTCTime) -> T3C -> Bool
-t3c_date_within_p (l,r) i = t3c_date_after_p l i && t3c_date_before_p r i
+t3c_date_within_p (l,r) i =
+    t3c_date_on_or_after_p l i &&
+    t3c_date_on_or_before_p r i
 
 t3c_week_starting :: UTCTime -> T3C -> Bool
 t3c_week_starting t = t3c_date_within_p (t,add_days 6 t)
@@ -121,7 +123,7 @@ with_t3c_io fn = join . with_hr fn
 
 -- * Summary
 
-data Summary = Summary {s_start :: UTCTime
+data Summary = Summary {s_bounds :: (UTCTime,UTCTime)
                        ,s_entries :: Int
                        ,s_dur :: Stat R
                        ,s_dur_t :: R
@@ -133,7 +135,7 @@ data Summary = Summary {s_start :: UTCTime
 
 mk_summary :: [T3C] -> Summary
 mk_summary r =
-    let st = minimum (map date_time r)
+    let bn = minimum_maximum (map date_time r)
         ne = length r
         du = stat "dur" duration_h r
         du_t = sum (map duration_h r)
@@ -142,11 +144,11 @@ mk_summary r =
         te = stat_nz 1 "te" training_effect r
         en = stat_nz 0 "en" energy r
         en_t = sum (map energy r)
-    in Summary st ne du du_t ha hm te en en_t
+    in Summary bn ne du du_t ha hm te en en_t
 
 summary_PP :: Summary -> String
 summary_PP s =
-  let l = [show ("start",s_start s)
+  let l = [show ("bounds",s_bounds s)
           ,show ("entries",s_entries s)
           ,show (stat_map format_hours (s_dur s))
           ,show (s_t3c_avg s)
@@ -173,7 +175,7 @@ cons_maybe p q =
 weekly_summary_from :: UTCTime -> [T3C] -> [Summary]
 weekly_summary_from t r =
     let f = t3c_week_starting t
-        r' = dropWhile (not . f) r
+        r' = dropWhile (not . t3c_date_on_or_after_p t) r
         (p,q) = span f r'
         p' = if null p then Nothing else Just (mk_summary p)
     in case q of
