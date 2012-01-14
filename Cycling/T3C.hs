@@ -2,6 +2,7 @@
 module Cycling.T3C where
 
 import Control.Monad
+import Data.Function
 import Data.List
 import Data.Maybe
 import Data.Time {- time -}
@@ -34,6 +35,9 @@ time_stamp = time_days . date_time
 -- | Parse list of 'I.Interval's from 'notes' field.
 intervals :: T3C -> Maybe [I.Interval]
 intervals = I.intervals . notes
+
+t3c_cmp :: T3C -> T3C -> Ordering
+t3c_cmp = compare `on` date_time
 
 -- * Parsing and formatting
 
@@ -108,15 +112,17 @@ week_starting = t3c_week_starting . parse_date
 
 -- * IO interaction
 
+-- | Sorts set of 'T3C' before processing.
 with_hr :: FilePath -> ([T3C] -> a) -> IO a
-with_hr fn f = fmap f (t3c_load fn)
+with_hr fn f = fmap (f . sortBy t3c_cmp) (t3c_load fn)
 
 with_t3c_io :: FilePath -> ([T3C] -> IO a) -> IO a
 with_t3c_io fn = join . with_hr fn
 
 -- * Summary
 
-data Summary = Summary {s_entries :: Int
+data Summary = Summary {s_start :: UTCTime
+                       ,s_entries :: Int
                        ,s_dur :: Stat R
                        ,s_dur_t :: R
                        ,s_t3c_avg :: Stat R
@@ -127,7 +133,8 @@ data Summary = Summary {s_entries :: Int
 
 mk_summary :: [T3C] -> Summary
 mk_summary r =
-    let ne = length r
+    let st = minimum (map date_time r)
+        ne = length r
         du = stat "dur" duration_h r
         du_t = sum (map duration_h r)
         ha = stat "hr-avg" hr_average r
@@ -135,11 +142,12 @@ mk_summary r =
         te = stat_nz 1 "te" training_effect r
         en = stat_nz 0 "en" energy r
         en_t = sum (map energy r)
-    in Summary ne du du_t ha hm te en en_t
+    in Summary st ne du du_t ha hm te en en_t
 
 summary_PP :: Summary -> String
 summary_PP s =
-  let l = [show ("entries",s_entries s)
+  let l = [show ("start",s_start s)
+          ,show ("entries",s_entries s)
           ,show (stat_map format_hours (s_dur s))
           ,show (s_t3c_avg s)
           ,show (s_t3c_max s)
@@ -155,11 +163,22 @@ instance Show Summary where
 summary :: FilePath -> (T3C -> Bool) -> IO ()
 summary fn p = with_t3c_io fn (putStrLn . summary_PP . mk_summary . filter p)
 
+cons_maybe :: Maybe a -> [a] -> [a]
+cons_maybe p q =
+    case p of
+      Just e -> e : q
+      Nothing -> q
+
+-- | Requires that the 'T3C' set be sorted by date.
 weekly_summary_from :: UTCTime -> [T3C] -> [Summary]
 weekly_summary_from t r =
-    case filter (t3c_week_starting t) r of
-      [] -> []
-      r' -> mk_summary r' : weekly_summary_from (add_days 7 t) r
+    let f = t3c_week_starting t
+        r' = dropWhile (not . f) r
+        (p,q) = span f r'
+        p' = if null p then Nothing else Just (mk_summary p)
+    in case q of
+         [] -> catMaybes [p']
+         _ -> cons_maybe p' (weekly_summary_from (add_days 7 t) q)
 
 weekly_summary_from' :: String -> [T3C] -> [Summary]
 weekly_summary_from' t = weekly_summary_from (parse_date t)
