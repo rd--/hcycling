@@ -18,6 +18,7 @@ library
                    csv,
                    frisby,
                    html-minimalist,
+                   hwww-minus,
                    old-locale,
                    split,
                    time,
@@ -41,7 +42,9 @@ library
 executable cycling-cgi
   build-depends:   base==4.*,
                    cgi,cmath,
-                   hcycling,html-minimalist,
+                   hcycling,
+                   html-minimalist,
+                   hwww-minus,
                    network,
                    old-locale,
                    split,

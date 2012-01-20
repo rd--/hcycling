@@ -14,7 +14,7 @@ import qualified Data.List.Split as S
 import qualified Data.Maybe as M
 import qualified Text.Printf as P
 import qualified Text.HTML.Light as H
-import qualified Text.HTML.Light.Common as H
+import qualified Text.HTML.Light.Composite as H
 import qualified Text.XML.Light as X
 
 import qualified Cycling.Cassette as C
