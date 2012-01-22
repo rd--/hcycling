@@ -18,10 +18,10 @@ library
                    csv,
                    frisby,
                    html-minimalist,
-                   hwww-minus,
                    old-locale,
                    split,
                    time,
+                   www-minus,
                    xml
   ghc-options:     -Wall -fwarn-tabs
   exposed-modules: Cycling.Analysis
@@ -44,12 +44,12 @@ executable cycling-cgi
                    cgi,cmath,
                    hcycling,
                    html-minimalist,
-                   hwww-minus,
                    network,
                    old-locale,
                    split,
                    time,
                    urlencoded,
+                   www-minus,
                    xml
   main-is:         cycling-cgi.hs
   ghc-options:     -Wall -fwarn-tabs
