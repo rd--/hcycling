@@ -93,6 +93,18 @@ hr_zones_zoladz hr_max =
     let adj = [50,40,30,20,10]
     in map (\x -> (hr_max - x - 5,hr_max - x + 5)) adj
 
+-- | trainingbible.com/joesblog/2009/11/quick-guide-to-setting-zones.html
+--
+-- > hr_zones_jf 167 == [(125.25,135.27),(135.27,148.63),(148.63,156.98)
+-- >                    ,(156.98,165.33),(167.0,170.34)
+-- >                    ,(172.01,177.02),(177.02,208.75)]
+hr_zones_jf :: Fractional t => t -> [(t,t)]
+hr_zones_jf lthr =
+    let a = [(0.75,0.81),(0.81,0.89),(0.89,0.94),(0.94,0.99),(1.00,1.02)
+            ,(1.03,1.06),(1.06,1.25)]
+        f (i,j) = (i * lthr,j * lthr)
+    in map f a
+
 -- > map (hr_target_karvonen 54 184) [0.5,0.85] == [119.0,164.5]
 hr_target_karvonen :: (Num a) => a -> a -> a -> a
 hr_target_karvonen hr_rest hr_max n = ((hr_max - hr_rest) * n) + hr_rest
