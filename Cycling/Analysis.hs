@@ -105,9 +105,15 @@ zipMaybe i j =
 
 -- | Predicate /and/.
 --
--- > filter (odd `p_and` (> 6)) [1..10] == [7,9]
+-- > filter (odd `p_and` (> 6)) [1..9] == [7,9]
 p_and :: (t -> Bool) -> (t -> Bool) -> t -> Bool
 p_and f g x = f x && g x
+
+-- | Predicate /or/.
+--
+-- > filter (odd `p_or` (> 6)) [1..9] == [1,3,5,7,8,9]
+p_or :: (t -> Bool) -> (t -> Bool) -> t -> Bool
+p_or f g x = f x || g x
 
 -- | Given field function find set of maxima.
 --
