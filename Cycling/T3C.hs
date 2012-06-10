@@ -100,8 +100,17 @@ t3c_date_within_p (l,r) i =
     t3c_date_on_or_after_p l i &&
     t3c_date_on_or_before_p r i
 
+-- | This is @1@ day /less/ than the amount /f/ shifts the time
+-- forward.  That is a week starting @2012-06-11@ runs throuh to
+-- @2012-06-17@.
+t3c_interval_starting :: (UTCTime -> UTCTime) -> UTCTime -> T3C -> Bool
+t3c_interval_starting f t = t3c_date_within_p (t,add_days (-1) (f t))
+
 t3c_week_starting :: UTCTime -> T3C -> Bool
-t3c_week_starting t = t3c_date_within_p (t,add_days 6 t)
+t3c_week_starting = t3c_interval_starting (add_days 7)
+
+t3c_month_starting :: UTCTime -> T3C -> Bool
+t3c_month_starting = t3c_interval_starting (add_months 1)
 
 t3c_note_includes_p :: String -> T3C -> Bool
 t3c_note_includes_p n i = n `isInfixOf` notes i
@@ -172,15 +181,24 @@ cons_maybe p q =
       Nothing -> q
 
 -- | Requires that the 'T3C' set be sorted by date.
-weekly_summary_from :: UTCTime -> [T3C] -> [Summary]
-weekly_summary_from t r =
-    let f = t3c_week_starting t
+interval_summary_from :: (UTCTime->UTCTime) -> UTCTime -> [T3C] -> [Summary]
+interval_summary_from i t r =
+    let f = t3c_interval_starting i t
         r' = dropWhile (not . t3c_date_on_or_after_p t) r
         (p,q) = span f r'
         p' = if null p then Nothing else Just (mk_summary p)
     in case q of
          [] -> catMaybes [p']
-         _ -> cons_maybe p' (weekly_summary_from (add_days 7 t) q)
+         _ -> cons_maybe p' (interval_summary_from i (i t) q)
+
+weekly_summary_from :: UTCTime -> [T3C] -> [Summary]
+weekly_summary_from t = interval_summary_from (add_days 7) t
 
 weekly_summary_from' :: String -> [T3C] -> [Summary]
 weekly_summary_from' t = weekly_summary_from (parse_date t)
+
+monthly_summary_from :: UTCTime -> [T3C] -> [Summary]
+monthly_summary_from t = interval_summary_from (add_months 1) t
+
+monthly_summary_from' :: String -> [T3C] -> [Summary]
+monthly_summary_from' t = monthly_summary_from (parse_date t)

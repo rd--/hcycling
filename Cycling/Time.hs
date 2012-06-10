@@ -159,6 +159,12 @@ format_hours h =
 add_days :: Integer -> UTCTime -> UTCTime
 add_days n (UTCTime d t) = UTCTime (addDays n d) t
 
+-- | Variant of 'addGregorianMonthsClip'.
+--
+-- > toGregorian (utctDay (add_months 1 (parse_date "2011-10-09"))) == (2011,11,09)
+add_months :: Integer -> UTCTime -> UTCTime
+add_months n (UTCTime d t) = UTCTime (addGregorianMonthsClip n d) t
+
 -- | Time in fractional days.
 --
 -- > round (time_days (parse_date_time ("2011-10-09","09:00"))) == 55843
