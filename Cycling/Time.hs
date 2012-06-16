@@ -77,6 +77,20 @@ duration_to_tuple f (Duration h m s ms) = (f h,f m,f s,f ms)
 tuple_to_duration :: (a -> Integer) -> (a,a,a,a) -> Duration
 tuple_to_duration f (h,m,s,ms) = Duration (f h) (f m) (f s) (f ms)
 
+-- > duration_to_hours (read "01:35:05.250")
+duration_to_hours :: Fractional n => Duration -> n
+duration_to_hours d =
+    let (h,m,s,ms) = duration_to_tuple fromIntegral d
+    in h + (m / 60) + (s / (60 * 60)) + (ms / (60 * 60 * 1000))
+
+-- > duration_to_minutes (read "01:35:05.250") == 95.0875
+duration_to_minutes :: Fractional n => Duration -> n
+duration_to_minutes = (* 60) . duration_to_hours
+
+-- > duration_to_seconds (read "01:35:05.250") == 5705.25
+duration_to_seconds :: Fractional n => Duration -> n
+duration_to_seconds = (* 60) . duration_to_minutes
+
 -- * Clock time related functions
 
 -- | Parse date in @Y-m-d@ form.

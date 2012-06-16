@@ -68,6 +68,9 @@ read_maybe s =
 read_r :: String -> R
 read_r x = M.fromMaybe 0.0 (read_maybe x)
 
+unD :: VAR -> T.Duration
+unD = read . var_n
+
 unR :: VAR -> R
 unR = read_r . var_n
 
@@ -273,16 +276,17 @@ mk_gearing_measurements_chart o =
 vam_opt :: OPT
 vam_opt =
     [("vertical-ascension","600",Unit)
-    ,("time","20",Unit)
+    ,("time","0:20:00.00",Unit)
     ,("average-gradient","8",Unit)
     ,("starting-altitude","0",Unit)]
 
 mk_vam :: OPT -> (Double,Double)
 mk_vam o =
-  let [va,t,gr,a] = map unR o
-      vmh = VAM.vam va t
-      wkg = VAM.vam_to_power vmh a gr
-  in (vmh,wkg)
+  case o of
+    [va,d,gr,a] -> let vmh = VAM.vam (unR va) (unD d)
+                       wkg = VAM.vam_to_power vmh (unR a) (unR gr)
+                   in (vmh,wkg)
+    _ -> error "mk_vam"
 
 mk_vam_chart :: OPT -> String
 mk_vam_chart o =

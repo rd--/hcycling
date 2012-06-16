@@ -5,18 +5,20 @@
 -- * <http://thecycleway.com/?p=748>
 module Cycling.VAM where
 
+import Cycling.Time
+
 -- | Synonym for 'Double'.
 type R = Double
 
--- | Given vertical ascent (in metres) and time (in minutes) and
+-- | Given vertical ascent (in metres) and time (as 'Duration') and
 -- average gradient (as percentage) calculate the /VAM/.
-velocita_ascensionale_media :: R -> R -> R
-velocita_ascensionale_media va t = (va * 60) / t
+velocita_ascensionale_media :: R -> Duration -> R
+velocita_ascensionale_media va t = (va * 60) / (duration_to_minutes t)
 
 -- | Synonym for 'velocita_ascensionale_media'.
 --
 -- > vam 600 20 == 1800
-vam :: R -> R -> R
+vam :: R -> Duration -> R
 vam = velocita_ascensionale_media
 
 -- | Account for gradient.

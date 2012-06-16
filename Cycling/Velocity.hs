@@ -62,7 +62,4 @@ feet_to_metres = (*) foot
 --
 -- > map (kph 0.25) [Duration 0 0 20 0,Duration 0 0 15 0] == [45,60]
 kph :: (Fractional a) => a -> Duration -> a
-kph k d =
-    let (h,m,s,ms) = duration_to_tuple fromIntegral d
-        t = h + (m / 60) + (s / (60 * 60)) + (ms / (60 * 60 * 1000))
-    in k / t
+kph k d = k / duration_to_hours d
