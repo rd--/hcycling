@@ -13,3 +13,6 @@ clean:
 
 clean-all:
 	rm -f index.cgi
+
+remote-update:
+	ssh rd@slavepianos.org "(cd sw/hcycling ; make all-ghc)"
