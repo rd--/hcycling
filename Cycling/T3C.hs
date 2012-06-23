@@ -36,6 +36,13 @@ time_stamp = time_days . date_time
 intervals :: T3C -> Maybe [I.Interval]
 intervals = I.intervals . notes
 
+-- | Uniform notation for average HR and intervals.
+hr_intervals :: T3C -> [(Integer,Integer)]
+hr_intervals t =
+    let f (I.Interval d r _) = (d,r)
+        w = (round (diff_time_minutes (duration t)),round (hr_average t))
+    in sortBy (compare `on` snd) (w : maybe [] (map f) (intervals t))
+
 t3c_cmp :: T3C -> T3C -> Ordering
 t3c_cmp = compare `on` date_time
 
