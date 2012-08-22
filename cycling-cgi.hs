@@ -7,7 +7,7 @@ type State = ()
 revise_opt :: C.OPT -> Query -> C.OPT
 revise_opt o qr =
    let get_f df nm = fromMaybe df (lookup nm qr)
-   in map (\(x,y,m) -> (x,get_f y x,m)) o
+   in map (\(k,v,u,m) -> (k,get_f v k,u,m)) o
 
 dispatch :: State -> Parameters -> Result
 dispatch _ (_,_,qr) =

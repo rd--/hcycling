@@ -1,1 +1,12 @@
-hcycling - rohan drape, 2010-2011
+hcycling
+--------
+
+A [set][ix] of cycling related `cgi` tables.  Input fields marked `{}`
+accept comma delimited lists.
+
+[ix]: sw/hcycling
+
+© [rohan drape][rd], 2010-2012, [gpl]
+
+[rd]: http://rd.slavepianos.org/
+[gpl]: http://gnu.org/copyleft/
