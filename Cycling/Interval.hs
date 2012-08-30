@@ -5,7 +5,8 @@ import Control.Monad
 import Data.Maybe
 import Text.Parsers.Frisby {- frisby -}
 
--- | An 'Interval' is a /duration/, an /average heart rate/ and perhaps a /cadence/.
+-- | An 'Interval' is a /duration/, an /average heart rate/ and
+-- perhaps a /cadence/.
 data Interval = Interval {interval_duration :: Integer
                          ,interval_hr :: Integer
                          ,interval_cadence :: Maybe Integer}
@@ -53,7 +54,9 @@ interval = fmap to_interval ((integer <<- char '@' <> integer) <> cadence)
 -- | Parse a 'Char' separated list of /e/ elements.
 --
 -- > runPeg (newRule (list ',' integer)) "[23,8,3]" == [23,8,3]
--- > runPeg (newRule (list ';' interval)) "[23@156^116]" == [Interval 23 156 (Just 116)]
+--
+-- > let r = [Interval 23 156 (Just 116)]
+-- > in runPeg (newRule (list ';' interval)) "[23@156^116]" == r
 list :: Char -> P s b -> P s [b]
 list c e =
     let i_element = e <<- char c
@@ -70,8 +73,9 @@ rem_pre = discard (many (noneOf "["))
 
 -- | Parse list of 'Interval's, discarding any pre- and post-ambles.
 --
--- > runPeg (newRule interval_list) "[23@156;8@148]" == [Interval 23 156 Nothing
--- >                                                    ,Interval 8 148 Nothing]
+-- > let r = [Interval 23 156 Nothing
+-- >         ,Interval 8 148 Nothing]
+-- > in runPeg (newRule interval_list) "[23@156;8@148]" == r
 interval_list :: P s [Interval]
 interval_list = rem_pre ->> list ';' interval <<- rest
 
@@ -79,6 +83,7 @@ interval_list = rem_pre ->> list ';' interval <<- rest
 --
 -- > intervals "pre [23@156;8@148] post" == Just [Interval 23 156 Nothing
 -- >                                             ,Interval 8 148 Nothing]
+--
 -- > intervals "no interval" == Nothing
 -- > intervals "" == Nothing
 intervals :: String -> Maybe [Interval]
@@ -109,7 +114,8 @@ intervals_adjacent i = zip (adjacencies interval_duration i) i
 
 -- | Total duration of a set of 'Interval's.
 --
--- > intervals_duration [Interval 23 156 Nothing,Interval 8 148 Nothing] == 31
+-- > let i = [Interval 23 156 Nothing,Interval 8 148 Nothing]
+-- > in intervals_duration i == 31
 intervals_duration :: [Interval] -> Integer
 intervals_duration = sum . map interval_duration
 
