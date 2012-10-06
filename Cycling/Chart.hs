@@ -171,7 +171,7 @@ mk_gradient_chart o =
 
 std_chainrings,std_sprockets :: String
 std_chainrings = "39,53"
-std_sprockets = C.cassette_string (C.shimano_105_12_25::[Int])
+std_sprockets = C.cassette_string (C.shimano_105 (12,25) :: [Int])
 
 gearing_cadence_opt :: OPT
 gearing_cadence_opt =
