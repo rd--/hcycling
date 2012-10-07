@@ -67,6 +67,24 @@ show_duration (Duration h m s ms) =
 instance Show Duration where
     show = show_duration
 
+normalise_minutes :: Duration -> Duration
+normalise_minutes (Duration h m s ms) =
+    let (h',m') = m `divMod` 60
+    in Duration (h + h') m' s ms
+
+normalise_seconds :: Duration -> Duration
+normalise_seconds (Duration h m s ms) =
+    let (m',s') = s `divMod` 60
+    in Duration h (m + m') s' ms
+
+normalise_milliseconds :: Duration -> Duration
+normalise_milliseconds (Duration h m s ms) =
+    let (s',ms') = ms `divMod` 1000
+    in Duration h m (s + s') ms'
+
+normalise_duration :: Duration -> Duration
+normalise_duration = normalise_minutes . normalise_seconds . normalise_milliseconds
+
 -- | Extract 'Duration' tuple applying filter function at each element
 --
 -- > duration_tuple id (Duration 1 35 5 250) == (1,35,5,250)
@@ -77,7 +95,7 @@ duration_to_tuple f (Duration h m s ms) = (f h,f m,f s,f ms)
 tuple_to_duration :: (a -> Integer) -> (a,a,a,a) -> Duration
 tuple_to_duration f (h,m,s,ms) = Duration (f h) (f m) (f s) (f ms)
 
--- > duration_to_hours (read "01:35:05.250")
+-- > duration_to_hours (read "01:35:05.250") == 1.5847916666666668
 duration_to_hours :: Fractional n => Duration -> n
 duration_to_hours d =
     let (h,m,s,ms) = duration_to_tuple fromIntegral d
@@ -90,6 +108,21 @@ duration_to_minutes = (* 60) . duration_to_hours
 -- > duration_to_seconds (read "01:35:05.250") == 5705.25
 duration_to_seconds :: Fractional n => Duration -> n
 duration_to_seconds = (* 60) . duration_to_minutes
+
+-- > hours_to_duration 1.5847916 == Duration 1 35 5 250
+hours_to_duration :: RealFrac a => a -> Duration
+hours_to_duration n =
+    let r = fromIntegral :: RealFrac a => Integer -> a
+        h = (r . floor) n
+        m = (n - h) * 60
+        (s,ms) = s_sms ((m - (r . floor) m) * 60)
+    in Duration (floor h) (floor m) s ms
+
+-- > duration_diff (Duration 1 35 5 250) (Duration 0 25 1 125) == (Duration 1 10 4 125)
+duration_diff :: Duration -> Duration -> Duration
+duration_diff p q =
+    let f = duration_to_hours :: Duration -> Double
+    in normalise_duration (hours_to_duration (f p - f q))
 
 -- * Clock time related functions
 

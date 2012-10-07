@@ -33,6 +33,9 @@ dispatch _ (_,_,qr) =
               Just "average-velocity" ->
                   let o = revise_opt C.avg_vel_opt qr
                   in C.mk_avg_vel_chart o
+              Just "elapsed-time-comparison" ->
+                  let o = revise_opt C.et_cmp_opt qr
+                  in C.mk_et_cmp_chart o
               _ -> C.mk_index
     in utf8_html_output c
 

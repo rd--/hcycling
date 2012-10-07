@@ -6,6 +6,7 @@ module Cycling.Chart (OPT
                      ,gradient_opt,mk_gradient_chart
                      ,vam_opt,mk_vam_chart
                      ,avg_vel_opt,mk_avg_vel_chart
+                     ,et_cmp_opt,mk_et_cmp_chart
                      ,mk_index) where
 
 import qualified Data.Function as F
@@ -320,6 +321,28 @@ mk_avg_vel_chart o =
         g (t,v) = [show t,f v,f (V.kph_to_mph v)]
     in mk_chart fm ["tm","kph","mph"] (map g tv)
 
+-- * Elapsed Time Comparison
+
+et_cmp_opt :: OPT
+et_cmp_opt =
+    [("A","0:30:00.00","h:m:s",List)
+    ,("B","0:30:00.00","h:m:s",List)]
+
+mk_et_cmp :: OPT -> [(T.Duration,T.Duration)]
+mk_et_cmp o =
+  let a = unL (o !! 0)
+      b = unL (o !! 1)
+  in zip a b
+
+mk_et_cmp_chart :: OPT -> String
+mk_et_cmp_chart o =
+    let tv = mk_et_cmp o
+        fm = opt_form ("chart","elapsed-time-comparison") o
+        pc a b = let f = T.duration_to_seconds
+                 in P.printf "%.1f" ((f b / f a) * 100 - 100 :: Double)
+        g (a,b) = [show a,show b,show (b `T.duration_diff` a),pc a b]
+    in mk_chart fm ["A","B","-","%"] (map g tv)
+
 mk_index :: String
 mk_index =
     let cs = L.sort ["cadence"
@@ -328,7 +351,8 @@ mk_index =
                     ,"gearing-measurements"
                     ,"gradient"
                     ,"velocita-ascensionale-media"
-                    ,"average-velocity"]
+                    ,"average-velocity"
+                    ,"elapsed-time-comparison"]
         mk_ln c = H.li [] [H.a [H.href ("?chart="++c)] [H.cdata c]]
         hd = H.head [] std_meta
         bd = H.body [] [H.ul [] (map mk_ln cs)]
