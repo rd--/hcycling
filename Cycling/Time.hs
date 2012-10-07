@@ -69,7 +69,9 @@ instance Show Duration where
 
 normalise_hours :: Duration -> Duration
 normalise_hours (Duration h m s ms) =
-    let (h',m') = if h == -1 then (0,m-60) else (h,m)
+    let (h',m') = if h < 0
+                  then if h == -1 then (0,m-60) else (h+1,abs (m - 60))
+                  else (h,m)
     in Duration h' m' s ms
 
 normalise_minutes :: Duration -> Duration
