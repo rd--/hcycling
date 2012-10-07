@@ -67,13 +67,6 @@ show_duration (Duration h m s ms) =
 instance Show Duration where
     show = show_duration
 
-normalise_hours :: Duration -> Duration
-normalise_hours (Duration h m s ms) =
-    let (h',m') = if h < 0
-                  then if h == -1 then (0,m-60) else (h+1,abs (m - 60))
-                  else (h,m)
-    in Duration h' m' s ms
-
 normalise_minutes :: Duration -> Duration
 normalise_minutes (Duration h m s ms) =
     let (h',m') = m `divMod` 60
@@ -91,7 +84,6 @@ normalise_milliseconds (Duration h m s ms) =
 
 normalise_duration :: Duration -> Duration
 normalise_duration =
-    normalise_hours .
     normalise_minutes .
     normalise_seconds .
     normalise_milliseconds
@@ -129,11 +121,29 @@ hours_to_duration n =
         (s,ms) = s_sms ((m - (r . floor) m) * 60)
     in Duration (floor h) (floor m) s ms
 
--- > duration_diff (Duration 1 35 5 250) (Duration 0 25 1 125) == (Duration 1 10 4 125)
+nil_duration :: Duration
+nil_duration = Duration 0 0 0 0
+
+negate_duration :: Duration -> Duration
+negate_duration (Duration h m s ms) =
+    let h' = if h > 0 then -h else h
+        m' = if h == 0 && m > 0 then -m else m
+        s' = if h == 0 && m == 0 && s > 0 then -s else s
+        ms' = if h == 0 && m == 0 && s == 0 then -ms else ms
+    in Duration h' m' s' ms'
+
+-- > duration_diff (Duration 1 35 5 250) (Duration 0 25 1 125) == Duration 1 10 4 125
+-- > duration_diff (Duration 0 25 1 125) (Duration 1 35 5 250) == Duration (-1) 10 4 125
+-- > duration_diff (Duration 0 25 1 125) (Duration 0 25 1 250) == Duration 0 0 0 (-125)
 duration_diff :: Duration -> Duration -> Duration
 duration_diff p q =
     let f = duration_to_hours :: Duration -> Double
-    in normalise_duration (hours_to_duration (f p - f q))
+        (p',q') = (f p,f q)
+        g = normalise_duration . hours_to_duration
+    in case compare p' q' of
+         LT -> negate_duration (g (q' - p'))
+         EQ -> nil_duration
+         GT -> g (p' - q')
 
 -- * Clock time related functions
 
