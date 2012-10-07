@@ -67,6 +67,11 @@ show_duration (Duration h m s ms) =
 instance Show Duration where
     show = show_duration
 
+normalise_hours :: Duration -> Duration
+normalise_hours (Duration h m s ms) =
+    let (h',m') = if h == -1 then (0,m-60) else (h,m)
+    in Duration h' m' s ms
+
 normalise_minutes :: Duration -> Duration
 normalise_minutes (Duration h m s ms) =
     let (h',m') = m `divMod` 60
@@ -83,7 +88,11 @@ normalise_milliseconds (Duration h m s ms) =
     in Duration h m (s + s') ms'
 
 normalise_duration :: Duration -> Duration
-normalise_duration = normalise_minutes . normalise_seconds . normalise_milliseconds
+normalise_duration =
+    normalise_hours .
+    normalise_minutes .
+    normalise_seconds .
+    normalise_milliseconds
 
 -- | Extract 'Duration' tuple applying filter function at each element
 --
