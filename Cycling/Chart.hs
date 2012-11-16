@@ -83,7 +83,7 @@ unI = floor . unR
 
 read_l :: (Read a) => String -> [a]
 read_l s =
-    let xs = S.sepBy "," s
+    let xs = S.splitOn "," s
     in M.mapMaybe read_maybe xs
 
 unL :: Read a => VAR -> [a]

@@ -17,7 +17,7 @@ instance Show Tyre where
 -- | 'Read' function for 'Tyre'.
 read_iso_tyre :: String -> Tyre
 read_iso_tyre x =
-    let [s,b] = S.sepBy "-" x
+    let [s,b] = S.splitOn "-" x
     in Tyre (read s) (read b)
 
 instance Read Tyre where

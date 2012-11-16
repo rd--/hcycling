@@ -4,8 +4,8 @@ description:       haskell cycling
 author:            Rohan Drape
 maintainer:        rd@slavepianos.org
 stability:         Experimental
-homepage:          http://slavepianos.org/rd/?t=hcycling
-tested-with:       GHC==7.2.2
+homepage:          http://rd.slavepianos.org/?t=hcycling
+tested-with:       GHC==7.6.1
 build-type:        Simple
 cabal-version:     >= 1.8
 
@@ -56,7 +56,7 @@ executable cycling-cgi
 
 source-repository  head
   Type:            darcs
-  Location:        http://slavepianos.org/rd/tn/hcycling
+  Location:        http://rd.slavepianos.org/sw/hcycling
 
 -- Local Variables:
 -- truncate-lines:t

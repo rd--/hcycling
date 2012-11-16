@@ -28,5 +28,5 @@ shimano_ultegra c =
 -- | Comma separated integer sequence.
 --
 -- > cassette_string (shimano_105 (11,23)) == "11,12,13,14,15,16,17,19,21,23"
-cassette_string :: Integral i => [i] -> String
+cassette_string :: (Show i,Integral i) => [i] -> String
 cassette_string = intercalate "," . map show
