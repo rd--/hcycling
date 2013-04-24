@@ -1,6 +1,7 @@
 module Cycling.Gearing where
 
-import qualified Data.List.Split as S
+import qualified Data.List.Split as S {- split -}
+
 import qualified Cycling.Velocity as V
 
 -- | ISO tyre specification (millimetres)

@@ -1,7 +1,7 @@
 -- | Cassette and sprocket related constants and functions
 module Cycling.Cassette where
 
-import Data.List
+import Data.List {- base -}
 
 -- | 105 cassettes.
 shimano_105 :: Integral i => (i,i) -> [i]

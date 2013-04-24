@@ -1,11 +1,11 @@
 -- | Time and duration related functions.
 module Cycling.Time where
 
-import qualified Data.List.Split as S
+import qualified Data.List.Split as S {- split -}
 import Data.Time {- time -}
 import qualified Foreign.C.Math.Double as M {- cmath -}
 import System.Locale {- old-locale -}
-import Text.Printf
+import Text.Printf {- base -}
 
 -- | Duration stored as /hours/, /minutes/, /seconds/ and /milliseconds/.
 data Duration = Duration {hours :: Integer

@@ -9,14 +9,14 @@ module Cycling.Chart (OPT
                      ,et_cmp_opt,mk_et_cmp_chart
                      ,mk_index) where
 
-import qualified Data.Function as F
-import qualified Data.List as L
-import qualified Data.List.Split as S
-import qualified Data.Maybe as M
-import qualified Text.Printf as P
-import qualified Text.HTML.Light as H
-import qualified Text.HTML.Light.Composite as H
-import qualified Text.XML.Light as X
+import qualified Data.Function as F {- base -}
+import qualified Data.List as L {- base -}
+import qualified Data.List.Split as S {- split -}
+import qualified Data.Maybe as M {- base -}
+import qualified Text.Printf as P {- base -}
+import qualified Text.HTML.Light as H {- html-minus -}
+import qualified Text.HTML.Light.Composite as H {- html-minus -}
+import qualified Text.XML.Light as X {- xml -}
 
 import qualified Cycling.Cassette as C
 import qualified Cycling.Gearing as G
@@ -234,18 +234,18 @@ mk_cadence_chart o =
 cadence_tyre_opt :: OPT
 cadence_tyre_opt =
     [("cadence","90","rpm",Atom)
-    ,("chainring","53","",Atom)
+    ,("chainring","53","",List)
     ,("sprocket","16","",List)
     ,("iso-tyre","23-622,25-622,28-622","iso",List)]
 
 mk_cadence_tyre :: OPT -> [(G.Tyre,Double)]
 mk_cadence_tyre o =
-  let c = unR (o !! 0)
-      [cr,cs] = map unI (section o (1,2))
+  let cd = unR (o !! 0)
+      [cr,sp] = map unL (section o (1,2))
       ty = unL (o !! 3)
-      g = G.Gear cr cs
       cmp (_,x) (_,y) = compare x y
-  in L.sortBy cmp [(t,G.velocity t g c) | t <- ty]
+  in L.sortBy cmp [(t,G.velocity t (G.Gear r s) cd) |
+                   t <- ty,r <- cr, s <- sp]
 
 mk_cadence_tyre_chart :: OPT -> String
 mk_cadence_tyre_chart o =

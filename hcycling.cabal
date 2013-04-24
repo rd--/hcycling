@@ -1,5 +1,5 @@
 name:              hcycling
-version:           0.1
+version:           0.14
 description:       haskell cycling
 author:            Rohan Drape
 maintainer:        rd@slavepianos.org
@@ -17,11 +17,11 @@ library
                    cmath,
                    csv,
                    frisby,
-                   html-minimalist,
+                   html-minimalist == 0.14.*,
                    old-locale,
                    split,
                    time,
-                   www-minus,
+                   www-minus == 0.14.*,
                    xml
   ghc-options:     -Wall -fwarn-tabs
   exposed-modules: Cycling.Analysis

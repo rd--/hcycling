@@ -1,10 +1,10 @@
 -- | Suunto T3C HR monitor related functions
 module Cycling.T3C where
 
-import Control.Monad
-import Data.Function
-import Data.List
-import Data.Maybe
+import Control.Monad {- base -}
+import Data.Function {- base -}
+import Data.List {- base -}
+import Data.Maybe {- base -}
 import Data.Time {- time -}
 import Text.CSV {- csv -}
 

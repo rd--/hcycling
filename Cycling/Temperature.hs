@@ -1,7 +1,7 @@
 -- | Temperature unit conversion
 module Cycling.Temperature where
 
-import Data.Ratio
+import Data.Ratio {- base -}
 
 -- > round (fahrenheit_to_celsius 100) == 38
 fahrenheit_to_celsius :: Rational -> Rational

@@ -1,6 +1,6 @@
 module Cycling.Weight where
 
-import Data.Ratio
+import Data.Ratio {- base -}
 
 -- | Conversion factor from /lb/s to kilograms.
 lb :: (Fractional t) => t

@@ -1,8 +1,8 @@
 -- | Parser for 'Interval' lists.
 module Cycling.Interval where
 
-import Control.Monad
-import Data.Maybe
+import Control.Monad {- base -}
+import Data.Maybe {- base -}
 import Text.Parsers.Frisby {- frisby -}
 
 -- | An 'Interval' is a /duration/, an /average heart rate/ and

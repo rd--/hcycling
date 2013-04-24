@@ -1,9 +1,9 @@
 -- | General purpose analysis functions.
 module Cycling.Analysis where
 
-import Data.Function
-import Data.List
-import Data.Maybe
+import Data.Function {- base -}
+import Data.List {- base -}
+import Data.Maybe {- base -}
 
 -- | A synonym for 'Double'.
 type R = Double
