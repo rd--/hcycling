@@ -1,11 +1,11 @@
 name:              hcycling
-version:           0.14
+version:           0.15
 description:       haskell cycling
 author:            Rohan Drape
 maintainer:        rd@slavepianos.org
 stability:         Experimental
 homepage:          http://rd.slavepianos.org/?t=hcycling
-tested-with:       GHC==7.6.1
+tested-with:       GHC == 7.6.1
 build-type:        Simple
 cabal-version:     >= 1.8
 
@@ -17,11 +17,11 @@ library
                    cmath,
                    csv,
                    frisby,
-                   html-minimalist == 0.14.*,
+                   html-minimalist == 0.15.*,
                    old-locale,
                    split,
                    time,
-                   www-minus == 0.14.*,
+                   www-minus == 0.15.*,
                    xml
   ghc-options:     -Wall -fwarn-tabs
   exposed-modules: Cycling.Analysis
@@ -40,16 +40,17 @@ library
                    Cycling.Weight
 
 executable cycling-cgi
-  build-depends:   base==4.*,
-                   cgi,cmath,
+  build-depends:   base == 4.*,
+                   cgi,
+                   cmath,
                    hcycling,
-                   html-minimalist,
+                   html-minimalist == 0.15.*,
                    network,
                    old-locale,
                    split,
                    time,
                    urlencoded,
-                   www-minus,
+                   www-minus == 0.15.*,
                    xml
   main-is:         cycling-cgi.hs
   ghc-options:     -Wall -fwarn-tabs
