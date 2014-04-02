@@ -14,5 +14,11 @@ clean:
 clean-all:
 	rm -f index.cgi
 
+push-sp:
+	darcs push -a rd@slavepianos.org:sw/hcycling
+
+pull-sp:
+	darcs pull -a http://rd.slavepianos.org/sw/hcycling
+
 remote-update:
 	ssh rd@slavepianos.org "(cd sw/hcycling ; make all-ghc)"
