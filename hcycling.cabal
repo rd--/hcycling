@@ -17,6 +17,7 @@ library
                    cmath,
                    csv,
                    frisby,
+                   hmt == 0.15.*,
                    html-minimalist == 0.15.*,
                    old-locale,
                    split,
