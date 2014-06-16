@@ -1,7 +1,7 @@
 -- | Velcoity and distance (unit) related functions.
 module Cycling.Velocity where
 
-import Cycling.Time
+import Music.Theory.Time.Duration {- hmt -}
 
 -- | Conversion factor from miles to kilometers.
 --

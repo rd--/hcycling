@@ -1,13 +1,9 @@
 -- | Time and duration related functions.
 module Cycling.Time where
 
-import qualified Data.List.Split as S {- split -}
 import Data.Time {- time -}
-import qualified Foreign.C.Math.Double as M {- cmath -}
 import System.Locale {- old-locale -}
 import Text.Printf {- base -}
-
-import Music.Theory.Time.Duration {- hmt -}
 
 -- * Clock time related functions
 
@@ -74,13 +70,16 @@ diff_time_minutes = (/ 60) . diff_time_seconds
 diff_time_hours :: DiffTime -> Double
 diff_time_hours = (/ 60) . diff_time_minutes
 
+floor' :: Double -> Double
+floor' = fromInteger . floor
+
 -- | Format fractional hours as @H:M'S@.
 --
 -- > format_hours 21.75 == "21:45'00"
 format_hours :: Double -> String
 format_hours h =
-    let m = (h - M.floor h) * 60
-        s = (m - M.floor m) * 60
+    let m = (h - floor' h) * 60
+        s = (m - floor' m) * 60
         f :: Double -> Int
         f = floor
     in printf "%d:%02d'%02d" (f h) (f m) (f s)

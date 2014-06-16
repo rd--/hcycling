@@ -18,10 +18,11 @@ import qualified Text.HTML.Light as H {- html-minus -}
 import qualified Text.HTML.Light.Composite as H {- html-minus -}
 import qualified Text.XML.Light as X {- xml -}
 
+import qualified Music.Theory.Time.Duration as T {- hmt -}
+
 import qualified Cycling.Cassette as C
 import qualified Cycling.Gearing as G
 import qualified Cycling.Power as P
-import qualified Cycling.Time as T
 import qualified Cycling.VAM as VAM
 import qualified Cycling.Velocity as V
 
@@ -78,8 +79,8 @@ unD = read . var_n
 unR :: VAR -> R
 unR = read_r . var_n
 
-unI :: VAR -> Int
-unI = floor . unR
+--unI :: VAR -> Int
+--unI = floor . unR
 
 read_l :: (Read a) => String -> [a]
 read_l s =
