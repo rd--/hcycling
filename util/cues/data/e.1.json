@@ -1,0 +1,24 @@
+[{"dur":10,"cue":"WARM UP"}
+,{"dur": 5,"cue":"HARD=110%"}
+,{"dur": 5,"cue":"REST"}
+,{"dur": 3,"cue":"VERY HARD"}
+,{"dur": 3,"cue":"REST"}
+,{"dur": 3,"cue":"VERY HARD"}
+,{"dur": 3,"cue":"REST"}
+,{"dur": 3,"cue":"VERY HARD"}
+,{"dur": 3,"cue":"REST"}
+,{"dur": 3,"cue":"VERY HARD"}
+,{"dur": 3,"cue":"REST"}
+,{"dur": 3,"cue":"VERY HARD"}
+,{"dur": 3,"cue":"REST"}
+,{"dur": 3,"cue":"VERY HARD"}
+,{"dur":10,"cue":"REST"}
+,{"dur": 2,"cue":"HARD"}
+,{"dur": 4,"cue":"REST"}
+,{"dur": 2,"cue":"HARD"}
+,{"dur": 4,"cue":"REST"}
+,{"dur": 2,"cue":"HARD"}
+,{"dur": 4,"cue":"REST"}
+,{"dur": 2,"cue":"HARD"}
+,{"dur":10,"cue":"WARM DOWN"}
+,{"dur": 0,"cue":"..."}]
