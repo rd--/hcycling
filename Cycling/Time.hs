@@ -2,16 +2,18 @@
 module Cycling.Time where
 
 import Data.Time {- time -}
-import System.Locale {- old-locale -}
 import Text.Printf {- base -}
 
 -- * Clock time related functions
+
+read_time :: TimeLocale -> String -> String -> UTCTime
+read_time = parseTimeOrError True
 
 -- | Parse date in @Y-m-d@ form.
 --
 -- > toGregorian (utctDay (parse_date "2011-10-09")) == (2011,10,9)
 parse_date :: String -> UTCTime
-parse_date = readTime defaultTimeLocale "%F"
+parse_date = read_time defaultTimeLocale "%F"
 
 -- | Format date in @Y-m-d@ form.
 --
@@ -23,7 +25,7 @@ format_date = formatTime defaultTimeLocale "%F"
 --
 -- > utctDayTime (parse_date_time ("2011-10-09","21:44")) == secondsToDiffTime 78240
 parse_date_time :: (String,String) -> UTCTime
-parse_date_time (d,t) = readTime defaultTimeLocale "%F%H:%M" (d++t)
+parse_date_time (d,t) = read_time defaultTimeLocale "%F%H:%M" (d++t)
 
 -- | Format time in @H:M@ form.
 --
@@ -41,7 +43,7 @@ format_date_time t = (format_date t,format_time t)
 --
 -- > parse_duration "21:44'30" == secondsToDiffTime 78270
 parse_duration :: String -> DiffTime
-parse_duration = utctDayTime . readTime defaultTimeLocale "%H:%M'%S"
+parse_duration = utctDayTime . read_time defaultTimeLocale "%H:%M'%S"
 
 -- | Format duration in @H:M'S@ form, the duration must be less than
 -- 24 hours.
