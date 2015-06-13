@@ -162,6 +162,24 @@ mk_summary r =
         en_t = sum (map energy r)
     in Summary bn ne du du_t ha hm te en en_t
 
+summary_CSV :: Summary -> [(String,String)]
+summary_CSV s =
+    let Summary (b,e) ne du dur_t hr_avg hr_max te en en_t = s
+        unstat x f (_,(smin,smax,savg)) = [(x ++ ".MIN",f smin)
+                                          ,(x ++ ".MAX",f smax)
+                                          ,(x ++ ".AVG",f savg)]
+        hr_pp h = format_duration (secondsToDiffTime (round (h * 60 * 60)))
+    in concat [[("BEGIN",format_date b)
+               ,("END",format_date e)
+               ,("ENTRIES",show ne)]
+              ,unstat "DUR" hr_pp du
+              ,unstat "HR.AVG" (show . round) hr_avg
+              ,unstat "HR.MAX" (show . round) hr_max
+              ,unstat "TE" (show . round) te
+              ,unstat "EN" (show . round) en
+              ,[("EN.TOTAL",show (round en_t))
+               ,("DUR.TOTAL",hr_pp dur_t)]]
+
 summary_PP :: Summary -> String
 summary_PP s =
   let l = [show ("bounds",s_bounds s)
