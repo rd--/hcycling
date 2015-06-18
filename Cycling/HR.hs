@@ -152,6 +152,21 @@ hr_lookup_wb hrm hr =
          Just z -> Just (hr,z,zone_name_wb !! z)
          Nothing -> Nothing
 
+-- | GCN HR numbers.
+--
+-- > let {hr = 167; r = [114,139,157,175]}
+-- > in map (\x -> round (x * 0.01 * hr)) (mapMaybe snd hr_gcn) == r
+hr_gcn :: Num n => [(String,Maybe n)]
+hr_gcn =
+    [("1. Active Recovery",Just 68)
+    ,("2. Endurance",Just 83)
+    ,("3. Tempo",Just 94)
+    ,("4. Lactate Threshold",Just 105)
+    ,("5. VO2 Max",Nothing)
+    ,("6. Anaerobic Capacity",Nothing)
+    ,("7. Neuromuscular",Nothing)
+    ]
+
 {-
 
 > import Music.Theory.Array.MD
