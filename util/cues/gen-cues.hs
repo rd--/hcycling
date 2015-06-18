@@ -6,52 +6,82 @@ import Data.Maybe {- base -}
 import qualified Data.Text as T {- text -}
 import GHC.Generics {- base -}
 
-data Cue = Cue {dur :: Double,cue :: T.Text} deriving Generic
+-- | Fractional minutes are mm.ss, so that 15.35 is 15 minutes and 35 seconds.
+--
+-- > fmin_to_sec 15.35 == 935
+fmin_to_sec :: (RealFrac f,Integral i) => f -> i
+fmin_to_sec n =
+    let m = floor n
+        s = round ((n - fromIntegral m) * 100)
+    in (m * 60) + s
+
+-- > sec_to_fmin 935 == 15.35
+sec_to_fmin :: (Fractional f, Integral i) => i -> f
+sec_to_fmin n =
+    let m = fromIntegral (floor (fromIntegral n / 60))
+        s = fromIntegral n - (m * 60)
+    in m + (s / 100)
+
+-- > fmin_add 1.30 0.45 == 2.15
+-- > fmin_add 1.30 0.45 == 2.15
+fmin_add :: RealFrac f => f -> f -> f
+fmin_add p q = sec_to_fmin (fmin_to_sec p + fmin_to_sec q)
+
+fmin_sub :: RealFrac f => f -> f -> f
+fmin_sub p q = sec_to_fmin (fmin_to_sec p - fmin_to_sec q)
+
+-- > fmin_mul 0.45 2 == 1.30
+fmin_mul :: (Integral i, RealFrac f) => f -> i -> f
+fmin_mul t n = sec_to_fmin (fmin_to_sec t * n)
+
+type FMIN = Double
+type SEC = Double
+data Cue = Cue {dur :: FMIN,cue :: T.Text} deriving Generic
 instance ToJSON Cue
 
-type IEL = (Double,Double,String)
+type IEL = (FMIN,FMIN,String)
 
-iel_dur :: Num n => [(n,x,y)] -> n
-iel_dur = sum . map (\(n,_,_) -> n)
+iel_dur :: [IEL] -> Double
+iel_dur = foldl fmin_add 0 . map (\(n,_,_) -> n)
 
-iel_cue :: IEL -> [Cue]
-iel_cue (i,e,l) =
+iel_cue :: String -> IEL -> [Cue]
+iel_cue def (i,e,l) =
     let e' = if e > 0 then Just (Cue e (T.pack l)) else Nothing
-        d = i - e
-        i' = if d > 0 then Just (Cue d (T.pack "REST")) else Nothing
+        d = fmin_sub i e
+        i' = if d > 0 then Just (Cue d (T.pack def)) else Nothing
     in catMaybes [e',i']
 
-iel_cues :: [IEL] -> [Cue]
-iel_cues = flip (++) [Cue 0 (T.pack "...")] . concatMap iel_cue
+iel_cues :: String -> [IEL] -> [Cue]
+iel_cues def = flip (++) [Cue 0 (T.pack "...")] . concatMap (iel_cue def)
 
 -- > iel_dur e_02 == 20
 e_02 :: [IEL]
 e_02 =
     let x = "VERY HARD"
         y = "LIMIT"
-    in [(4,4,"WARM UP")
-       ,(2,1/2,x)
-       ,(2+3/4,3/4,x)
-       ,(3,1,y)
-       ,(2+1/4,3/4,x)
-       ,(2,1/2,y)
-       ,(1/6,1/6,y)
-       ,(5/6,5/6,x)
-       ,(1/6,1/6,y)
-       ,(2+5/6,2+5/6,"WARM DOWN")]
+    in [(4.00,4.00,"WARM UP")
+       ,(2.00,0.30,x)
+       ,(2.45,0.45,x)
+       ,(3.00,1.00,y)
+       ,(2.15,0.45,x)
+       ,(2.00,0.30,y)
+       ,(0.10,0.10,y)
+       ,(0.50,0.50,x)
+       ,(0.10,0.10,y)
+       ,(2.50,2.50,"WARM DOWN")]
 
-type ITL = (Double,Double,Int,String)
+type ITL = (FMIN,FMIN,Int,String)
 
 itl_to_iel :: ITL -> [IEL]
-itl_to_iel (_,i,t,l) = replicate t (i * 2,i,l)
+itl_to_iel (_,i,t,l) = replicate t (fmin_mul i 2,i,l)
 
-itl_cues :: [ITL] -> [Cue]
-itl_cues = iel_cues . concatMap itl_to_iel
+itl_cues :: String -> [ITL] -> [Cue]
+itl_cues def = iel_cues def . concatMap itl_to_iel
 
 itl_dur :: [ITL] -> (Double,Double)
 itl_dur x =
-    let f = sum . map (\(n,_,_,_) -> n)
-        g = sum . map (\(_,i,t,_) -> i * fromIntegral t * 2)
+    let f = foldl fmin_add 0 . map (\(n,_,_,_) -> n)
+        g = foldl fmin_add 0 . map (\(_,i,t,_) -> fmin_mul i (t * 2))
     in (f x,g x)
 
 -- > itl_dur e_03
@@ -60,17 +90,17 @@ e_03 =
     let x = "HARD"
         y = "VERY HARD"
         z = "LIMIT"
-    in [(2+1/2,1/4,5,z)
-       ,(3,1/2,3,y)
-       ,(6,3/4,4,x)
-       ,(3,3/4,2,x)
-       ,(3,1/2,3,y)
-       ,(2+1/2,1/4,5,z)]
+    in [(2.30,0.15,5,z)
+       ,(3.00,0.30,3,y)
+       ,(6.00,0.45,4,x)
+       ,(3.00,0.45,2,x)
+       ,(3.00,0.30,3,y)
+       ,(2.30,0.15,5,z)]
 
 prj_file :: FilePath -> FilePath
 prj_file = (++) "/home/rohan/sw/hcycling/util/cues/data/"
 
 main :: IO ()
 main = do
-  B.writeFile (prj_file "e.2.json") (encode (iel_cues e_02))
-  B.writeFile (prj_file "e.3.json") (encode (itl_cues e_03))
+  B.writeFile (prj_file "e.2.json") (encode (iel_cues "REST" e_02))
+  B.writeFile (prj_file "e.3.json") (encode (itl_cues "TEMPO" e_03))

@@ -47,9 +47,8 @@ function ctime_sec() {
 }
 
 function sec_to_timestr(n) {
-    var d = new Date(null);
-    d.setSeconds(n);
-    return d.toISOString().substr(11,8);
+    var d = new Date(n * 1000);
+    return d.toUTCString().substr(17,8);
 }
 
 function get_cue_ix(c,t) {
@@ -62,7 +61,6 @@ function get_cue_ix(c,t) {
 function get_cue(c,t) {
     return c[get_cue_ix(c,t)].cue;
 }
-
 
 function fmin_to_timestr (t) {
     return sec_to_timestr(fmin_to_sec(t));
