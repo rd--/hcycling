@@ -187,7 +187,8 @@ hr_gcn =
 
 -}
 
--- | Calculate the average heart-rate after extracting an interval from it.
+-- | Re-calculate an average heart-rate of (dur,ppm) after extracting
+-- an interval from it.  Duration is in minutes.
 --
 -- > let req (a,b) (c,d) = round a == round c && round b == round d
 -- > hr_avg_extract (40,149) (5,137) `req` (35,151)
