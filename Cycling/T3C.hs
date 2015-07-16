@@ -86,7 +86,7 @@ t3c_print = print . t3c_csv
 
 t3c_load :: FilePath -> IO [T3C]
 t3c_load fn = do
-  (Right r) <- parseCSVFromFile fn
+  Right r <- parseCSVFromFile fn
   return (mapMaybe t3c_parse r)
 
 -- * Selection functions (t3c predicates)

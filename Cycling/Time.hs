@@ -1,6 +1,7 @@
 -- | Time and duration related functions.
 module Cycling.Time where
 
+import Data.List.Split {- time -}
 import Data.Time {- time -}
 import Text.Printf {- base -}
 
@@ -109,3 +110,39 @@ time_days t =
         s = utctDayTime t
         s_max = 86401
     in d' + (fromRational (toRational s) / s_max)
+
+-- * DHMS
+
+-- | Convert seconds into (days,hours,minutes,seconds).
+--
+-- > seconds_to_dhms 1475469 == (17,1,51,9)
+seconds_to_dhms :: Integral n => n -> (n,n,n,n)
+seconds_to_dhms n =
+    let (d,h') = n `divMod` (24 * 60 * 60)
+        (h,m') = h' `divMod` (60 * 60)
+        (m,s) = m' `divMod` 60
+    in (d,h,m,s)
+
+-- | Inverse of 'seconds_to_dhms'.
+--
+-- > dhms_to_seconds (17,1,51,9) == 1475469
+dhms_to_seconds :: Num n => (n,n,n,n) -> n
+dhms_to_seconds (d,h,m,s) = sum [d * 24 * 60 * 60,h * 60 * 60,m * 60,s]
+
+-- | Parse DHMS text.  All parts are optional, order is not
+-- significant, multiple entries are allowed.
+--
+-- > parse_dhms "17d1h51m9s" == (17,1,51,9)
+-- > parse_dhms "1s3d" == (3,0,0,1)
+-- > parse_dhms "1h1h" == (0,2,0,0)
+parse_dhms :: (Integral n,Read n) => String -> (n,n,n,n)
+parse_dhms =
+    let sep_elem = split . keepDelimsR . oneOf
+        sep_last x = let e:x' = reverse x in (reverse x',e)
+        p x = case sep_last x of
+                (n,'d') -> read n * 24 * 60 * 60
+                (n,'h') -> read n * 60 * 60
+                (n,'m') -> read n * 60
+                (n,'s') -> read n
+                _ -> error "parse_dhms"
+    in seconds_to_dhms . sum . map p . filter (not . null) . sep_elem "dhms"
