@@ -162,6 +162,9 @@ mk_summary r =
         en_t = sum (map energy r)
     in Summary bn ne du du_t ha hm te en en_t
 
+round_int :: RealFrac n => n -> Int
+round_int = round
+
 summary_CSV :: Summary -> [(String,String)]
 summary_CSV s =
     let Summary (b,e) ne du dur_t hr_avg hr_max te en en_t = s
@@ -173,11 +176,11 @@ summary_CSV s =
                ,("END",format_date e)
                ,("ENTRIES",show ne)]
               ,unstat "DUR" hr_pp du
-              ,unstat "HR.AVG" (show . round) hr_avg
-              ,unstat "HR.MAX" (show . round) hr_max
-              ,unstat "TE" (show . round) te
-              ,unstat "EN" (show . round) en
-              ,[("EN.TOTAL",show (round en_t))
+              ,unstat "HR.AVG" (show . round_int) hr_avg
+              ,unstat "HR.MAX" (show . round_int) hr_max
+              ,unstat "TE" (show . round_int) te
+              ,unstat "EN" (show . round_int) en
+              ,[("EN.TOTAL",(show . round_int) en_t)
                ,("DUR.TOTAL",hr_pp dur_t)]]
 
 summary_PP :: Summary -> String

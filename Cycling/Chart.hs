@@ -14,10 +14,9 @@ import qualified Data.List as L {- base -}
 import qualified Data.List.Split as S {- split -}
 import qualified Data.Maybe as M {- base -}
 import qualified Text.Printf as P {- base -}
-import qualified Text.HTML.Light as H {- html-minus -}
-import qualified Text.HTML.Light.Composite as H {- html-minus -}
 import qualified Text.XML.Light as X {- xml -}
 
+import qualified Text.HTML.Minus as H {- html-minus -}
 import qualified Music.Theory.Time.Duration as T {- hmt -}
 
 import qualified Cycling.Cassette as C

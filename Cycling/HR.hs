@@ -2,7 +2,6 @@ module Cycling.HR where
 
 import Data.Bifunctor {- bifunctors -}
 import Data.List {- base -}
-import Data.Maybe {- base -}
 
 -- * Age predicted heart rate maxima
 
