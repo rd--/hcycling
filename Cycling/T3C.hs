@@ -10,7 +10,7 @@ import Text.CSV {- csv -}
 
 import Cycling.Analysis
 import qualified Cycling.Interval as I
-import Cycling.Time
+import qualified Cycling.Time as T
 
 -- * T3C data type
 
@@ -26,11 +26,11 @@ data T3C = T3C {date_time :: UTCTime
 
 -- | Real valued duration (hours).
 duration_h :: T3C -> R
-duration_h = diff_time_hours . duration
+duration_h = T.difftime_to_fhr . duration
 
 -- | Real valued time-stamp (days).
 time_stamp :: T3C -> R
-time_stamp = time_days . date_time
+time_stamp = T.utctime_to_fdays . date_time
 
 -- | Parse list of 'I.Interval's from 'notes' field.
 intervals :: T3C -> Maybe [I.Interval]
@@ -40,7 +40,7 @@ intervals = I.intervals . notes
 hr_intervals :: T3C -> [(Integer,Integer)]
 hr_intervals t =
     let f (I.Interval d r _) = (d,r)
-        w = (round (diff_time_minutes (duration t)),round (hr_average t))
+        w = (round (T.difftime_to_fmin (duration t)),round (hr_average t))
     in sortBy (compare `on` snd) (w : maybe [] (map f) (intervals t))
 
 t3c_cmp :: T3C -> T3C -> Ordering
@@ -55,8 +55,8 @@ t3c_parse i =
     case i of
       [_,"     ","        ","   ","   ","   ","    ",_] -> Nothing
       [dt,tm,du,te,av,mx,en,nt] ->
-          let dt' = parse_date_time (dt,tm)
-              du' = parse_duration du
+          let dt' = T.parse_iso8601_date_time (dt,tm)
+              du' = T.parse_duration du
               te' = read te
               av' = read av
               mx' = read mx
@@ -67,9 +67,9 @@ t3c_parse i =
 -- | Format a 'T3C' value.
 t3c_format :: T3C -> [String]
 t3c_format (T3C dt du te av mx en n) =
-    [format_date dt
-    ,format_time dt
-    ,format_duration du
+    [T.format_iso8601_date dt
+    ,T.format_iso8601_time dt
+    ,T.format_duration du
     ,show te
     ,show (floor av::Int)
     ,show (floor mx::Int)
@@ -111,22 +111,22 @@ t3c_date_within_p (l,r) i =
 -- forward.  That is a week starting @2012-06-11@ runs throuh to
 -- @2012-06-17@.
 t3c_interval_starting :: (UTCTime -> UTCTime) -> UTCTime -> T3C -> Bool
-t3c_interval_starting f t = t3c_date_within_p (t,add_days (-1) (f t))
+t3c_interval_starting f t = t3c_date_within_p (t,T.add_days (-1) (f t))
 
 t3c_week_starting :: UTCTime -> T3C -> Bool
-t3c_week_starting = t3c_interval_starting (add_days 7)
+t3c_week_starting = t3c_interval_starting (T.add_days 7)
 
 t3c_month_starting :: UTCTime -> T3C -> Bool
-t3c_month_starting = t3c_interval_starting (add_months 1)
+t3c_month_starting = t3c_interval_starting (T.add_months 1)
 
 t3c_note_includes_p :: String -> T3C -> Bool
 t3c_note_includes_p n i = n `isInfixOf` notes i
 
 by_date :: (String,String) -> T3C -> Bool
-by_date (l,r) = t3c_date_within_p (parse_date l,parse_date r)
+by_date (l,r) = t3c_date_within_p (T.parse_iso8601_date l,T.parse_iso8601_date r)
 
 week_starting :: String -> T3C -> Bool
-week_starting = t3c_week_starting . parse_date
+week_starting = t3c_week_starting . T.parse_iso8601_date
 
 -- * IO interaction
 
@@ -171,9 +171,9 @@ summary_CSV s =
         unstat x f (_,(smin,smax,savg)) = [(x ++ ".MIN",f smin)
                                           ,(x ++ ".MAX",f smax)
                                           ,(x ++ ".AVG",f savg)]
-        hr_pp h = format_duration (secondsToDiffTime (round (h * 60 * 60)))
-    in concat [[("BEGIN",format_date b)
-               ,("END",format_date e)
+        hr_pp h = T.format_duration (secondsToDiffTime (round (h * 60 * 60)))
+    in concat [[("BEGIN",T.format_iso8601_date b)
+               ,("END",T.format_iso8601_date e)
                ,("ENTRIES",show ne)]
               ,unstat "DUR" hr_pp du
               ,unstat "HR.AVG" (show . round_int) hr_avg
@@ -187,13 +187,13 @@ summary_PP :: Summary -> String
 summary_PP s =
   let l = [show ("bounds",s_bounds s)
           ,show ("entries",s_entries s)
-          ,show (stat_map format_hours (s_dur s))
+          ,show (stat_map T.format_fhr (s_dur s))
           ,show (s_t3c_avg s)
           ,show (s_t3c_max s)
           ,show (s_en s)
           ,show (s_te s)
           ,show ("total en:",s_en_t s)
-          ,show ("total dur:",format_hours (s_dur_t s))]
+          ,show ("total dur:",T.format_fhr (s_dur_t s))]
   in unlines l
 
 instance Show Summary where
@@ -220,13 +220,13 @@ interval_summary_from i t r =
          _ -> cons_maybe p' (interval_summary_from i (i t) q)
 
 weekly_summary_from :: UTCTime -> [T3C] -> [Summary]
-weekly_summary_from t = interval_summary_from (add_days 7) t
+weekly_summary_from t = interval_summary_from (T.add_days 7) t
 
 weekly_summary_from' :: String -> [T3C] -> [Summary]
-weekly_summary_from' t = weekly_summary_from (parse_date t)
+weekly_summary_from' t = weekly_summary_from (T.parse_iso8601_date t)
 
 monthly_summary_from :: UTCTime -> [T3C] -> [Summary]
-monthly_summary_from t = interval_summary_from (add_months 1) t
+monthly_summary_from t = interval_summary_from (T.add_months 1) t
 
 monthly_summary_from' :: String -> [T3C] -> [Summary]
-monthly_summary_from' t = monthly_summary_from (parse_date t)
+monthly_summary_from' t = monthly_summary_from (T.parse_iso8601_date t)

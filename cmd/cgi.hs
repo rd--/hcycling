@@ -1,6 +1,6 @@
-import qualified Cycling.Chart as C
-import Data.Maybe
-import WWW.Minus.CGI {- hwww-minus -}
+import qualified Cycling.Chart as C {- hcycling -}
+import Data.Maybe {- base -}
+import WWW.Minus.CGI {- www-minus -}
 
 type State = ()
 

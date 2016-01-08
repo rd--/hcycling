@@ -10,6 +10,7 @@ all-cabal:
 clean:
 	rm -f */*.o */*.hi *.o *.hi
 	rm -Rf dist
+	(cd cmd ; make clean)
 
 clean-all:
 	rm -f index.cgi

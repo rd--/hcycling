@@ -5,7 +5,7 @@ author:            Rohan Drape
 maintainer:        rd@slavepianos.org
 stability:         Experimental
 homepage:          http://rd.slavepianos.org/t/hcycling
-tested-with:       GHC == 7.10.1
+tested-with:       GHC == 7.10.3
 build-type:        Simple
 cabal-version:     >= 1.8
 
@@ -39,21 +39,6 @@ library
                    Cycling.VAM
                    Cycling.Velocity
                    Cycling.Weight
-
-executable cycling-cgi
-  build-depends:   base >= 4.8,
-                   cgi,
-                   hcycling,
-                   hmt == 0.16.*,
-                   html-minus == 0.16.*,
-                   network,
-                   split,
-                   time,
-                   urlencoded,
-                   www-minus == 0.16.*,
-                   xml
-  main-is:         cycling-cgi.hs
-  ghc-options:     -Wall -fwarn-tabs
 
 source-repository  head
   Type:            darcs
