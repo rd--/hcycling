@@ -2,142 +2,161 @@
 module Cycling.Time where
 
 import Data.List.Split {- time -}
-import Data.Time {- time -}
+import qualified Data.Time as T {- time -}
+
+-- * Util
+
+floor' :: Double -> Double
+floor' = fromInteger . floor
 
 -- * Clock time related functions
 
-parse_time_str :: String -> String -> UTCTime
-parse_time_str = parseTimeOrError True defaultTimeLocale
+parse_time_str :: String -> String -> T.UTCTime
+parse_time_str = T.parseTimeOrError True T.defaultTimeLocale
 
-format_time_str :: String -> UTCTime -> String
-format_time_str = formatTime defaultTimeLocale
+format_time_str :: String -> T.UTCTime -> String
+format_time_str = T.formatTime T.defaultTimeLocale
+
+-- | Week number (1-52)
+type WEEK = Int
+
+-- | Week that /t/ lies in.
+--
+-- > map (time_to_week . parse_iso8601_date) ["2017-01-01","2011-10-09"] == [52,40]
+time_to_week :: T.UTCTime -> WEEK
+time_to_week = read . format_time_str "%V"
+
+-- * ISO-8601
 
 -- | Parse date in ISO-8601 (@Y-m-d@) form.
 --
--- > toGregorian (utctDay (parse_iso8601_date "2011-10-09")) == (2011,10,9)
-parse_iso8601_date :: String -> UTCTime
+-- > T.toGregorian (T.utctDay (parse_iso8601_date "2011-10-09")) == (2011,10,9)
+parse_iso8601_date :: String -> T.UTCTime
 parse_iso8601_date = parse_time_str "%F"
 
 -- | Format date in ISO-8601 (@Y-m-d@) form.
 --
 -- > format_iso8601_date (parse_iso8601_date "2011-10-09") == "2011-10-09"
-format_iso8601_date :: UTCTime -> String
+format_iso8601_date :: T.UTCTime -> String
 format_iso8601_date = format_time_str "%F"
 
--- > format_iso8601_week (parse_iso8601_date "2011-10-09") == "2011-W40"
-format_iso8601_week :: UTCTime -> String
+{- | Format date in ISO-8601 (@Y-W@) form.
+
+> let r = ["2016-W52","2011-W40"]
+> in map (format_iso8601_week . parse_iso8601_date) ["2017-01-01","2011-10-09"] == r
+
+-}
+format_iso8601_week :: T.UTCTime -> String
 format_iso8601_week = format_time_str "%G-W%V"
 
-type WEEK = Int
-
--- > time_to_week (parse_iso8601_date "2011-10-09") == 40
-time_to_week :: UTCTime -> WEEK
-time_to_week = read . format_time_str "%V"
-
-parse_iso8601_time :: String -> UTCTime
+-- | Parse ISO-8601 @H:M:S@ time.
+--
+-- > format_iso8601_time (parse_iso8601_time "21:44:00") == "21:44:00"
+parse_iso8601_time :: String -> T.UTCTime
 parse_iso8601_time = parse_time_str "%H:%M:%S"
 
 -- | Format time in @H:M:S@ form.
 --
 -- > format_iso8601_time (parse_iso8601_date_time "2011-10-09T21:44:00") == "21:44:00"
-format_iso8601_time :: UTCTime -> String
+format_iso8601_time :: T.UTCTime -> String
 format_iso8601_time = format_time_str "%H:%M:%S"
 
 -- | Parse date in @Y-m-d@ and time in @H:M:%S@ forms.
 --
--- > utctDayTime (parse_iso8601_date_time "2011-10-09T21:44:00") == secondsToDiffTime 78240
-parse_iso8601_date_time :: String -> UTCTime
+-- > T.utctDayTime (parse_iso8601_date_time "2011-10-09T21:44:00") == T.secondsToDiffTime 78240
+parse_iso8601_date_time :: String -> T.UTCTime
 parse_iso8601_date_time = parse_time_str "%FT%H:%M:%S"
 
 -- | Format date in @Y-m-d@ and time in @H:M:S@ forms.
 --
 -- > let t = parse_iso8601_date_time "2011-10-09T21:44:00"
 -- > in format_iso8601_date_time t == "2011-10-09T21:44:00"
-format_iso8601_date_time :: UTCTime -> String
+format_iso8601_date_time :: T.UTCTime -> String
 format_iso8601_date_time = format_time_str "%FT%H:%M:%S"
+
+-- * Duration
 
 -- | Parse duration in @H:M:S@ form.
 --
--- > parse_duration "21:44:30" == secondsToDiffTime 78270
-parse_duration :: String -> DiffTime
-parse_duration = utctDayTime . parse_iso8601_time
+-- > parse_duration "21:44:30" == T.secondsToDiffTime 78270
+parse_duration :: String -> T.DiffTime
+parse_duration = T.utctDayTime . parse_iso8601_time
 
 -- | Format duration in @H:M:S@ form, the duration must be less than
 -- 24 hours.
 --
 -- > format_duration (parse_duration "21:44:30") == "21:44:30"
-format_duration :: DiffTime -> String
+format_duration :: T.DiffTime -> String
 format_duration t =
-    let t' = UTCTime (ModifiedJulianDay 0) t
+    let t' = T.UTCTime (T.ModifiedJulianDay 0) t
     in format_time_str "%H:%M:%S" t'
 
--- | 'DiffTime' in fractional seconds.
+-- | 'T.DiffTime' in fractional seconds.
 --
 -- > difftime_to_fsec (parse_duration "21:44:30") == 78270
-difftime_to_fsec :: DiffTime -> Double
+difftime_to_fsec :: T.DiffTime -> Double
 difftime_to_fsec = fromRational . toRational
 
--- | 'DiffTime' in fractional minutes.
+-- | 'T.DiffTime' in fractional minutes.
 --
 -- > difftime_to_fmin (parse_duration "21:44:30") == 1304.5
-difftime_to_fmin :: DiffTime -> Double
+difftime_to_fmin :: T.DiffTime -> Double
 difftime_to_fmin = (/ 60) . difftime_to_fsec
 
--- | 'DiffTime' in fractional hours.
---
--- > difftime_to_fhr (parse_duration "21:45:00") == 21.75
-difftime_to_fhr :: DiffTime -> Double
-difftime_to_fhr = (/ 60) . difftime_to_fmin
+-- | Fractional hour.
+type FHOUR = Double
 
-floor' :: Double -> Double
-floor' = fromInteger . floor
+-- | 'T.DiffTime' in fractional hours.
+--
+-- > difftime_to_fhour (parse_duration "21:45:00") == 21.75
+difftime_to_fhour :: T.DiffTime -> FHOUR
+difftime_to_fhour = (/ 60) . difftime_to_fmin
 
 -- | Fractional hour to (hours,minutes,seconds).
 --
--- > fhr_to_hrminsec 21.75 == (21,45,0)
-fhr_to_hrminsec :: Double -> (Int,Int,Int)
-fhr_to_hrminsec h =
+-- > fhour_to_hourminsec 21.75 == (21,45,0)
+fhour_to_hourminsec :: FHOUR -> (Int,Int,Int)
+fhour_to_hourminsec h =
     let m = (h - floor' h) * 60
         s = (m - floor' m) * 60
     in (floor h,floor m,round s)
 
--- > fhr_to_fsec 21.75 == 78300.0
-fhr_to_fsec :: Num n => n -> n
-fhr_to_fsec = (*) (60 * 60)
-
--- | Fractional hour.
-type FHR = Double
-
--- > fsec_to_picoseconds 78240.05
-fsec_to_picoseconds :: FHR -> Integer
-fsec_to_picoseconds s = floor (s * (10 ** 12))
-
 -- | Fractional seconds.
 type FSEC = Double
 
-fsec_to_difftime :: FSEC -> DiffTime
-fsec_to_difftime = picosecondsToDiffTime . fsec_to_picoseconds
+-- | Fractional hour to seconds.
+--
+-- > fhour_to_fsec 21.75 == 78300.0
+fhour_to_fsec :: FHOUR -> FSEC
+fhour_to_fsec = (*) (60 * 60)
 
-fhr_to_difftime :: FHR -> DiffTime
-fhr_to_difftime = fsec_to_difftime . fhr_to_fsec
+-- > fsec_to_picoseconds 78240.05
+fsec_to_picoseconds :: FSEC -> Integer
+fsec_to_picoseconds s = floor (s * (10 ** 12))
+
+fsec_to_difftime :: FSEC -> T.DiffTime
+fsec_to_difftime = T.picosecondsToDiffTime . fsec_to_picoseconds
+
+fhour_to_difftime :: FHOUR -> T.DiffTime
+fhour_to_difftime = fsec_to_difftime . fhour_to_fsec
 
 -- | Format fractional hours as @H:M:S@.
 --
--- > format_fhr 21.75 == "21:45:00"
-format_fhr :: FHR -> String
-format_fhr = format_duration . fhr_to_difftime
+-- > format_fhour 21.75 == "21:45:00"
+format_fhour :: FHOUR -> String
+format_fhour = format_duration . fhour_to_difftime
 
--- | Add an 'Integer' number of days to a 'UTCTime'.
+-- | Add an 'Integer' number of days to a 'T.UTCTime'.
 --
 -- > toGregorian (utctDay (add_days 1 (parse_iso8601_date "2011-10-09"))) == (2011,10,10)
-add_days :: Integer -> UTCTime -> UTCTime
-add_days n (UTCTime d t) = UTCTime (addDays n d) t
+add_days :: Integer -> T.UTCTime -> T.UTCTime
+add_days n (T.UTCTime d t) = T.UTCTime (T.addDays n d) t
 
 -- | Variant of 'addGregorianMonthsClip'.
 --
 -- > toGregorian (utctDay (add_months 1 (parse_iso8601_date "2011-10-09"))) == (2011,11,09)
-add_months :: Integer -> UTCTime -> UTCTime
-add_months n (UTCTime d t) = UTCTime (addGregorianMonthsClip n d) t
+add_months :: Integer -> T.UTCTime -> T.UTCTime
+add_months n (T.UTCTime d t) = T.UTCTime (T.addGregorianMonthsClip n d) t
 
 -- | Fractional days.
 type FDAY = Double
@@ -146,11 +165,11 @@ type FDAY = Double
 --
 -- > round (utctime_to_fday (parse_iso8601_date_time "2011-10-09T09:00:00")) == 55843
 -- > round (utctime_to_fday (parse_iso8601_date_time "2011-10-09T21:00:00")) == 55844
-utctime_to_fday :: UTCTime -> FDAY
+utctime_to_fday :: T.UTCTime -> FDAY
 utctime_to_fday t =
-    let d = utctDay t
-        d' = fromIntegral (toModifiedJulianDay d)
-        s = utctDayTime t
+    let d = T.utctDay t
+        d' = fromIntegral (T.toModifiedJulianDay d)
+        s = T.utctDayTime t
         s_max = 86401
     in d' + (fromRational (toRational s) / s_max)
 
