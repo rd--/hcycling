@@ -8,6 +8,8 @@ import Data.Maybe {- base -}
 import Data.Time {- time -}
 import Text.CSV {- csv -}
 
+import qualified Music.Theory.Time.Notation as T {- hmt -}
+
 import Cycling.Analysis
 import qualified Cycling.Interval as I
 import qualified Cycling.Time as T
@@ -26,11 +28,11 @@ data T3C = T3C {date_time :: UTCTime
 
 -- | Real valued duration (hours).
 duration_h :: T3C -> R
-duration_h = T.difftime_to_fhr . duration
+duration_h = T.difftime_to_fhour . duration
 
 -- | Real valued time-stamp (days).
 time_stamp :: T3C -> R
-time_stamp = T.utctime_to_fdays . date_time
+time_stamp = T.utctime_to_fday . date_time
 
 -- | Parse list of 'I.Interval's from 'notes' field.
 intervals :: T3C -> Maybe [I.Interval]
@@ -55,7 +57,7 @@ t3c_parse i =
     case i of
       [_,"     ","        ","   ","   ","   ","    ",_] -> Nothing
       [dt,tm,du,te,av,mx,en,nt] ->
-          let dt' = T.parse_iso8601_date_time (dt,tm)
+          let dt' = T.parse_iso8601_date_time (dt ++ "T" ++ tm)
               du' = T.parse_duration du
               te' = read te
               av' = read av
@@ -187,13 +189,13 @@ summary_PP :: Summary -> String
 summary_PP s =
   let l = [show ("bounds",s_bounds s)
           ,show ("entries",s_entries s)
-          ,show (stat_map T.format_fhr (s_dur s))
+          ,show (stat_map T.format_fhour (s_dur s))
           ,show (s_t3c_avg s)
           ,show (s_t3c_max s)
           ,show (s_en s)
           ,show (s_te s)
           ,show ("total en:",s_en_t s)
-          ,show ("total dur:",T.format_fhr (s_dur_t s))]
+          ,show ("total dur:",T.format_fhour (s_dur_t s))]
   in unlines l
 
 instance Show Summary where

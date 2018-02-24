@@ -39,13 +39,13 @@ std_meta =
 mk_chart_c :: X.Content -> [String] -> [[(String,Maybe String)]] -> String
 mk_chart_c fm t g =
     let mk_cl (e,c) = let a = case c of
-                                Just c' -> [H.class' c']
+                                Just c' -> [H.class_attr c']
                                 Nothing -> []
                       in H.td a [H.cdata e]
         mk_tr xs = H.tr [] (map mk_cl xs)
         th = H.tr [] (map (\x -> H.th [] [H.cdata x]) t)
         hd = H.head [] std_meta
-        bd = H.body [] [fm,H.table [H.class' "result"] (th : map mk_tr g)]
+        bd = H.body [] [fm,H.table [H.class_attr "result"] (th : map mk_tr g)]
         h = H.html std_html_attr [hd,bd]
     in H.renderHTML5 h
 
@@ -122,25 +122,25 @@ append_mode_str s m =
 
 opt_form :: (String,String) -> OPT -> X.Content
 opt_form z o =
-    let mk_h (k,v) = H.input [H.type' "hidden"
+    let mk_h (k,v) = H.input [H.type_attr "hidden"
                              ,H.name k
                              ,H.value v]
         mk_s (k,v,u,m) =
-            H.tr [] [H.td [H.class' "key"]
+            H.tr [] [H.td [H.class_attr "key"]
                           [H.cdata (append_mode_str k m)]
                     ,H.td []
                           [H.input
-                                [H.type' "text"
+                                [H.type_attr "text"
                                 ,H.name k
                                 ,H.value v]]
-                    ,H.td [H.class' "unit"]
+                    ,H.td [H.class_attr "unit"]
                           [H.cdata u]]
-        sb = H.input [H.class' "submit"
-                     ,H.type' "submit"
+        sb = H.input [H.class_attr "submit"
+                     ,H.type_attr "submit"
                      ,H.value "calculate"]
     in H.form
          [H.action "./",H.method "get"]
-         (mk_h z : H.table [H.class' "opt-form"] (map mk_s o) : [sb])
+         (mk_h z : H.table [H.class_attr "opt-form"] (map mk_s o) : [sb])
 
 gradient_opt :: OPT
 gradient_opt =

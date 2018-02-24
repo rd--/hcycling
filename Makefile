@@ -1,10 +1,5 @@
-all-ghc:
+mk-cgi:
 	ghc --make cycling-cgi.hs -o index.cgi
-	strip -s index.cgi
-
-all-cabal:
-	cabal install --disable-documentation
-	cp dist/build/cycling-cgi/cycling-cgi index.cgi
 	strip -s index.cgi
 
 clean:
@@ -22,4 +17,4 @@ pull-sp:
 	darcs pull -a http://rd.slavepianos.org/sw/hcycling
 
 remote-update:
-	ssh rd@slavepianos.org "(cd sw/hcycling ; make all-ghc)"
+	ssh rd@slavepianos.org "(cd sw/hcycling ; make mk-cgi)"

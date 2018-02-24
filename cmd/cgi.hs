@@ -1,16 +1,16 @@
 import qualified Cycling.Chart as C {- hcycling -}
 import Data.Maybe {- base -}
-import WWW.Minus.CGI {- www-minus -}
+import qualified WWW.Minus.CGI as W {- www-minus -}
 
 type State = ()
 
-revise_opt :: C.OPT -> Query -> C.OPT
+revise_opt :: C.OPT -> W.Query -> C.OPT
 revise_opt o qr =
    let get_f df nm = fromMaybe df (lookup nm qr)
    in map (\(k,v,u,m) -> (k,get_f v k,u,m)) o
 
-dispatch :: State -> Parameters -> Result
-dispatch _ (_,_,qr) =
+dispatch :: State -> W.Parameters -> IO ()
+dispatch _ (_,qr) =
     let c = case lookup "chart" qr of
               Just "cadence" ->
                   let o = revise_opt C.cadence_opt qr
@@ -37,7 +37,7 @@ dispatch _ (_,_,qr) =
                   let o = revise_opt C.et_cmp_opt qr
                   in C.mk_et_cmp_chart o
               _ -> C.mk_index
-    in utf8_html_output c
+    in W.utf8_html_output c
 
 main :: IO ()
-main = run_cgi () dispatch
+main = W.cgi_main (dispatch ())
