@@ -10,11 +10,11 @@ clean:
 clean-all:
 	rm -f index.cgi
 
-push-sp:
-	darcs push -a rd@slavepianos.org:sw/hcycling
+push-rd:
+	darcs push -a rd@rohandrape.net:sw/hcycling
 
-pull-sp:
-	darcs pull -a http://rd.slavepianos.org/sw/hcycling
+pull-rd:
+	darcs pull -a http://rohandrape.net/sw/hcycling
 
 remote-update:
-	ssh rd@slavepianos.org "(cd sw/hcycling ; make mk-cgi)"
+	ssh rd@rohandrape.net "(cd sw/hcycling ; make mk-cgi)"
