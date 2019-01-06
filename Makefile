@@ -1,6 +1,5 @@
 mk-cgi:
-	ghc --make cycling-cgi.hs -o index.cgi
-	strip -s index.cgi
+	(cd cmd; make)
 
 clean:
 	rm -f */*.o */*.hi *.o *.hi
