@@ -1,8 +1,8 @@
 @media screen {body {margin: 5em}}
 @media all and (max-width: 800px) {body {margin: 0.25em}}
 
-body {font-family: sans-serif}
-body {font-size: 8pt}
+body {font-family: monospace,sans-serif}
+body {font-size: 1em}
 body {max-width: 40em}
 a {color: #444}
 ul {padding: 0em}

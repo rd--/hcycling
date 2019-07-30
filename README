@@ -1,9 +1,9 @@
 hcycling
 --------
 
-A [set][ix] of cycling related `cgi` tables.
+A [set](sw/hcycling) of cycling related `cgi` tables.
 Input fields marked `{}` accept comma delimited lists.
 
-[ix]: sw/hcycling
-
-© [rohan drape](http://rohandrape.net/), 2010-2018, [gpl](http://gnu.org/copyleft/)
+© [rohan drape](http://rohandrape.net/),
+  2010-2019,
+  [gpl](http://gnu.org/copyleft/)

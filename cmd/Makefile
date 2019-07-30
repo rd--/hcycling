@@ -19,4 +19,3 @@ ln-local:
 	rm -f Text WWW
 	ln -s ~/sw/html-minus/Text Text
 	ln -s ~/sw/www-minus/WWW WWW
-

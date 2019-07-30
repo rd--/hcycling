@@ -1,9 +1,7 @@
-{-# Language ExistentialQuantification #-}
 module Cycling.Solve where
 
 -- | Iterative solver data.
 data Solve x a =
-    (Fractional x,Num a,Ord a) =>
     Solve {function :: x -> a -- ^ 'input' -> 'output' function to solve
           ,tolerance :: a -- ^ accepted tolerance at 'output'
           ,output :: a -- ^ required output value
@@ -11,7 +9,7 @@ data Solve x a =
           ,increment :: x -- ^ initial value to shift 'input'
           }
 
-solve' :: Ordering -> Solve x a -> (x,a)
+solve' :: (Num a,Ord a,Fractional x) => Ordering -> Solve x a -> (x,a)
 solve' d (Solve f t o i n) =
     let o' = f i
         d' = compare o' o
@@ -28,5 +26,5 @@ solve' d (Solve f t o i n) =
 -- within specified 'tolerance').
 --
 -- > solve (Solve (* 2) 0 10 20 4) == (5,10)
-solve :: Solve x a -> (x, a)
+solve :: (Num a,Ord a,Fractional x) => Solve x a -> (x, a)
 solve = solve' EQ

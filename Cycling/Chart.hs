@@ -1,13 +1,4 @@
-module Cycling.Chart (OPT
-                     ,cadence_opt,mk_cadence_chart
-                     ,cadence_tyre_opt,mk_cadence_tyre_chart
-                     ,gearing_cadence_opt,mk_gearing_cadence_chart
-                     ,gearing_measurements_opt,mk_gearing_measurements_chart
-                     ,gradient_opt,mk_gradient_chart
-                     ,vam_opt,mk_vam_chart
-                     ,avg_vel_opt,mk_avg_vel_chart
-                     ,et_cmp_opt,mk_et_cmp_chart
-                     ,mk_index) where
+module Cycling.Chart where
 
 import qualified Data.Function as F {- base -}
 import qualified Data.List as L {- base -}
