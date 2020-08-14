@@ -69,8 +69,8 @@ t3c_parse i =
 -- | Format a 'T3C' value.
 t3c_format :: T3C -> [String]
 t3c_format (T3C dt du te av mx en n) =
-    [T.format_iso8601_date dt
-    ,T.format_iso8601_time dt
+    [T.format_iso8601_date True dt
+    ,T.format_iso8601_time True dt
     ,T.format_duration du
     ,show te
     ,show (floor av::Int)
@@ -174,8 +174,8 @@ summary_CSV s =
                                           ,(x ++ ".MAX",f smax)
                                           ,(x ++ ".AVG",f savg)]
         hr_pp h = T.format_duration (secondsToDiffTime (round (h * 60 * 60)))
-    in concat [[("BEGIN",T.format_iso8601_date b)
-               ,("END",T.format_iso8601_date e)
+    in concat [[("BEGIN",T.format_iso8601_date True b)
+               ,("END",T.format_iso8601_date True e)
                ,("ENTRIES",show ne)]
               ,unstat "DUR" hr_pp du
               ,unstat "HR.AVG" (show . round_int) hr_avg

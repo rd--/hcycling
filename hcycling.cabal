@@ -1,11 +1,11 @@
 name:              hcycling
-version:           0.18
+version:           0.19
 description:       haskell cycling
 author:            Rohan Drape
 maintainer:        rd@rohandrape.net
 stability:         Experimental
 homepage:          http://rohandrape.net/t/hcycling
-tested-with:       GHC == 8.4.4
+tested-with:       GHC == 8.6.5
 build-type:        Simple
 cabal-version:     >= 1.8
 
@@ -16,12 +16,12 @@ library
   build-depends:   base >= 4.8,
                    csv,
                    frisby,
-                   hmt == 0.18.*,
-                   html-minus == 0.18.*,
+                   hmt == 0.19.*,
+                   html-minus == 0.19.*,
                    old-locale,
                    split,
                    time,
-                   www-minus == 0.18.*,
+                   www-minus == 0.19.*,
                    xml
   ghc-options:     -Wall -fwarn-tabs
   exposed-modules: Cycling.Analysis
