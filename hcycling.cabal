@@ -5,7 +5,7 @@ author:            Rohan Drape
 maintainer:        rd@rohandrape.net
 stability:         Experimental
 homepage:          http://rohandrape.net/t/hcycling
-tested-with:       GHC == 8.6.5
+tested-with:       GHC == 8.8.3
 build-type:        Simple
 cabal-version:     >= 1.8
 
