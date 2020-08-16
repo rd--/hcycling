@@ -1,4 +1,4 @@
--- | Velcoity and distance (unit) related functions.
+-- | Velocity and distance (unit) related functions.
 module Cycling.Velocity where
 
 import Music.Theory.Time.Duration {- hmt -}

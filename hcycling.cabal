@@ -33,7 +33,6 @@ library
                    Cycling.Physiology
                    Cycling.Power
                    Cycling.Solve
-                   Cycling.T3C
                    Cycling.Temperature
                    Cycling.Time
                    Cycling.VAM
