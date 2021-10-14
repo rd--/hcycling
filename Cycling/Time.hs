@@ -3,7 +3,7 @@ module Cycling.Time where
 
 import Data.Time {- time -}
 
-import qualified Music.Theory.Time.Notation as T {- hmt -}
+import qualified Music.Theory.Time.Notation as T {- hmt-base -}
 
 -- * Duration
 
@@ -25,7 +25,7 @@ format_duration t =
 -- | Format fractional hours as @H:M:S@.
 --
 -- > format_fhour 21.75 == "21:45:00"
-format_fhour :: T.FHOUR -> String
+format_fhour :: T.FHour -> String
 format_fhour = format_duration . T.fhour_to_difftime
 
 -- | Add an 'Integer' number of days to a 'UTCTime'.

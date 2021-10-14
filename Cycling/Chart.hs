@@ -8,7 +8,7 @@ import qualified Text.Printf as P {- base -}
 import qualified Text.XML.Light as X {- xml -}
 
 import qualified Text.HTML.Minus as H {- html-minus -}
-import qualified Music.Theory.Time.Duration as T {- hmt -}
+import qualified Music.Theory.Time.Duration as T {- hmt-base -}
 
 import qualified Cycling.Cassette as C
 import qualified Cycling.Gearing as G

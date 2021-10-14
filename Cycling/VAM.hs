@@ -5,7 +5,7 @@
 -- * <http://thecycleway.com/?p=748>
 module Cycling.VAM where
 
-import Music.Theory.Time.Duration {- hmt -}
+import Music.Theory.Time.Duration {- hmt-base -}
 
 -- | Synonym for 'Double'.
 type R = Double
