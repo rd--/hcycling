@@ -83,12 +83,6 @@ normalise_r_m l =
 normalise_tr :: (Fractional a) => (a,a) -> (a,a,a) -> (a,a,a)
 normalise_tr r (x,y,z) = let f = normalise r in (f x,f y,f z)
 
--- | Variant that 'sort's on 'Ord' value extracted by /f/.
---
--- > sort_on snd [('a',1),('b',0)] == [('b',0),('a',1)]
-sort_on :: (Ord b) => (a -> b) -> [a] -> [a]
-sort_on = sortBy . on compare
-
 -- | Variant of 'zip' that discards elements from the /lhs/ list that
 -- do not have a counterpart in the /rhs/ list.
 --
@@ -135,4 +129,4 @@ maximaByOn f = maximumBy (compare `on` f)
 --
 -- > extractor (>=) fst snd 4 (zip "abdc" [5,3,3,4]) == [('a',5),('c',4)]
 extractor :: Ord b => (c->c->Bool) -> (a->b) -> (a->c) -> c -> [a] -> [a]
-extractor c s f n = sort_on s . filter (\h -> f h `c` n)
+extractor c s f n = sortOn s . filter (\h -> f h `c` n)

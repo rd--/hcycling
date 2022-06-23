@@ -7,7 +7,7 @@ import qualified Data.Maybe as M {- base -}
 import qualified Text.Printf as P {- base -}
 import qualified Text.XML.Light as X {- xml -}
 
-import qualified Text.HTML.Minus as H {- html-minus -}
+import qualified Text.Html.Minus as H {- html-minus -}
 import qualified Music.Theory.Time.Duration as T {- hmt-base -}
 
 import qualified Cycling.Cassette as C
@@ -38,7 +38,7 @@ mk_chart_c fm t g =
         hd = H.head [] std_meta
         bd = H.body [] [fm,H.table [H.class_attr "result"] (th : map mk_tr g)]
         h = H.html std_html_attr [hd,bd]
-    in H.renderHTML5_pp h
+    in H.renderHtml5_pp h
 
 mk_chart :: X.Content -> [String] -> [[String]] -> String
 mk_chart fm t = mk_chart_c fm t . map (map (\e -> (e,Nothing)))
@@ -348,4 +348,4 @@ mk_index =
         hd = H.head [] std_meta
         bd = H.body [] [H.ul [] (map mk_ln cs)]
         h = H.html std_html_attr [hd,bd]
-    in H.renderHTML5_pp h
+    in H.renderHtml5_pp h
