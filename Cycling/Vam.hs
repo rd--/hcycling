@@ -1,9 +1,9 @@
--- | VAM (velocita ascensionale media)
+-- | Vam (velocita ascensionale media)
 --
 -- * <http://en.wikipedia.org/wiki/Velocity_Ascended,_Metres_per_hour>
 --
 -- * <http://thecycleway.com/?p=748>
-module Cycling.VAM where
+module Cycling.Vam where
 
 import Music.Theory.Time.Duration {- hmt-base -}
 
@@ -11,7 +11,7 @@ import Music.Theory.Time.Duration {- hmt-base -}
 type R = Double
 
 -- | Given vertical ascent (in metres) and time (as 'Duration') and
--- average gradient (as percentage) calculate the /VAM/.
+-- average gradient (as percentage) calculate the /Vam/.
 velocita_ascensionale_media :: R -> Duration -> R
 velocita_ascensionale_media va t = (va * 60) / (duration_to_minutes t)
 
@@ -26,7 +26,7 @@ gradient_factor :: R -> R
 gradient_factor x = 2 + (x / 10)
 
 -- | Account for altitude.  \"I think it is reasonable to evaluate an
--- average reduction in VAM values by approximately 3% every 500m of
+-- average reduction in Vam values by approximately 3% every 500m of
 -- elevation\" (/MF/).  The value here is a scaling factor used at
 -- 'vam_to_power'.
 --

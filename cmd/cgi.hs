@@ -1,12 +1,12 @@
 import Data.Maybe {- base -}
 
-import qualified WWW.Minus.CGI as W {- www-minus -}
+import qualified Www.Minus.Cgi as W {- www-minus -}
 
 import qualified Cycling.Chart as C {- hcycling -}
 
 type State = ()
 
-revise_opt :: C.OPT -> W.Query -> C.OPT
+revise_opt :: C.Opt -> W.Query -> C.Opt
 revise_opt o qr =
    let get_f df nm = fromMaybe df (lookup nm qr)
    in map (\(k,v,u,m) -> (k,get_f v k,u,m)) o

@@ -13,7 +13,7 @@ import qualified Music.Theory.Time.Duration as T {- hmt-base -}
 import qualified Cycling.Cassette as C
 import qualified Cycling.Gearing as G
 import qualified Cycling.Power as P
-import qualified Cycling.VAM as VAM
+import qualified Cycling.Vam as Vam
 import qualified Cycling.Velocity as V
 
 std_html_attr :: [X.Attr]
@@ -48,10 +48,10 @@ type Name = String
 type Default = String
 type Unit = String
 data Mode = Atom | List
-type VAR = (Name,Default,Unit,Mode)
-type OPT = [VAR]
+type Var = (Name,Default,Unit,Mode)
+type Opt = [Var]
 
-var_n :: VAR -> String
+var_n :: Var -> String
 var_n (_,n,_,_) = n
 
 read_maybe :: (Read a) => String -> Maybe a
@@ -63,13 +63,13 @@ read_maybe s =
 read_r :: String -> R
 read_r x = M.fromMaybe 0.0 (read_maybe x)
 
-unD :: VAR -> T.Duration
+unD :: Var -> T.Duration
 unD = read . var_n
 
-unR :: VAR -> R
+unR :: Var -> R
 unR = read_r . var_n
 
---unI :: VAR -> Int
+--unI :: Var -> Int
 --unI = floor . unR
 
 read_l :: (Read a) => String -> [a]
@@ -77,13 +77,13 @@ read_l s =
     let xs = S.splitOn "," s
     in M.mapMaybe read_maybe xs
 
-unL :: Read a => VAR -> [a]
+unL :: Read a => Var -> [a]
 unL = read_l . var_n
 
-unRl :: VAR -> [R]
+unRl :: Var -> [R]
 unRl = unL
 
-unTY :: VAR -> G.Tyre
+unTY :: Var -> G.Tyre
 unTY = G.read_iso_tyre . var_n
 
 section :: [a] -> (Int,Int) -> [a]
@@ -111,7 +111,7 @@ append_mode_str s m =
       [] -> s
       m' -> s ++ " " ++ m'
 
-opt_form :: (String,String) -> OPT -> X.Content
+opt_form :: (String,String) -> Opt -> X.Content
 opt_form z o =
     let mk_h (k,v) = H.input [H.type_attr "hidden"
                              ,H.name k
@@ -133,7 +133,7 @@ opt_form z o =
          [H.action "./",H.method "get"]
          (mk_h z : H.table [H.class_attr "opt-form"] (map mk_s o) : [sb])
 
-gradient_opt :: OPT
+gradient_opt :: Opt
 gradient_opt =
     [("tolerance","0.05","",Atom)
     ,("rider-weight","63.5,70","kg",List)
@@ -142,7 +142,7 @@ gradient_opt =
     ,("power","280,320","w",List)
     ,("gradient","6,7,8,9,10,11,12","%",List)]
 
-mk_gradient :: OPT -> [(R,R,R,R)]
+mk_gradient :: Opt -> [(R,R,R,R)]
 mk_gradient o =
   let [t,m_b,m_k] = map (unR . (o !!)) [0,2,3]
       m_rl = unRl (o !! 1)
@@ -153,7 +153,7 @@ mk_gradient o =
                     in (m_r,g,v,w')
   in [f (m_r,w,g) | m_r <- m_rl, w <- wl, g <- gl]
 
-mk_gradient_chart :: OPT -> String
+mk_gradient_chart :: Opt -> String
 mk_gradient_chart o =
     let f = P.printf "%.1f"
         gs = mk_gradient o
@@ -165,7 +165,7 @@ std_chainrings,std_sprockets :: String
 std_chainrings = "39,53"
 std_sprockets = C.cassette_string (C.shimano_105 (12,25) :: [Int])
 
-gearing_cadence_opt :: OPT
+gearing_cadence_opt :: Opt
 gearing_cadence_opt =
     [("cadence-minima","60","rpm",Atom)
     ,("cadence-maxima","120","rpm",Atom)
@@ -174,7 +174,7 @@ gearing_cadence_opt =
     ,("sprocket",std_sprockets,"",List)
     ,("iso-tyre","23-622","iso",Atom)]
 
-mk_gearing_cadence :: OPT -> [(G.Gear,Double,Double)]
+mk_gearing_cadence :: Opt -> [(G.Gear,Double,Double)]
 mk_gearing_cadence o =
   let [c_min,c_max,v] = map unR (section o (0,2))
       [cr,cs] = map unRl (section o (3,4))
@@ -187,7 +187,7 @@ mk_gearing_cadence o =
 gear_class :: G.Gear -> String
 gear_class g = "cw-" ++ show (G.chainwheel g)
 
-mk_gearing_cadence_chart :: OPT -> String
+mk_gearing_cadence_chart :: Opt -> String
 mk_gearing_cadence_chart o =
     let f = P.printf "%.1f"
         gs = mk_gearing_cadence o
@@ -197,14 +197,14 @@ mk_gearing_cadence_chart o =
         fm = opt_form ("chart","gearing-cadence") o
     in mk_chart_c fm ["gear","cadence","velocity"] gs'
 
-cadence_opt :: OPT
+cadence_opt :: Opt
 cadence_opt =
     [("cadence","90,110","rpm",List)
     ,("chainring",std_chainrings,"",List)
     ,("sprocket",std_sprockets,"",List)
     ,("iso-tyre","23-622","iso",Atom)]
 
-mk_cadence :: OPT -> [(G.Gear,Double,Double)]
+mk_cadence :: Opt -> [(G.Gear,Double,Double)]
 mk_cadence o =
   let [cd,cr,cs] = map unRl (section o (0,2))
       ty = unTY (o !! 3)
@@ -212,7 +212,7 @@ mk_cadence o =
       cmp (_,_,x) (_,_,y) = compare x y
   in L.sortBy cmp [(g,c,G.velocity ty g c) | c <- cd,g <- gs]
 
-mk_cadence_chart :: OPT -> String
+mk_cadence_chart :: Opt -> String
 mk_cadence_chart o =
     let f = P.printf "%.1f"
         gs = mk_cadence o
@@ -222,14 +222,14 @@ mk_cadence_chart o =
         fm = opt_form ("chart","cadence") o
     in mk_chart_c fm ["gear","cadence","velocity"] gs'
 
-cadence_tyre_opt :: OPT
+cadence_tyre_opt :: Opt
 cadence_tyre_opt =
     [("cadence","90","rpm",Atom)
     ,("chainring","53","",List)
     ,("sprocket","16","",List)
     ,("iso-tyre","23-622,25-622,28-622","iso",List)]
 
-mk_cadence_tyre :: OPT -> [(G.Tyre,Double)]
+mk_cadence_tyre :: Opt -> [(G.Tyre,Double)]
 mk_cadence_tyre o =
   let cd = unR (o !! 0)
       [cr,sp] = map unL (section o (1,2))
@@ -238,7 +238,7 @@ mk_cadence_tyre o =
   in L.sortBy cmp [(t,G.velocity t (G.Gear r s) cd) |
                    t <- ty,r <- cr, s <- sp]
 
-mk_cadence_tyre_chart :: OPT -> String
+mk_cadence_tyre_chart :: Opt -> String
 mk_cadence_tyre_chart o =
     let f = P.printf "%.1f"
         r = mk_cadence_tyre o
@@ -246,13 +246,13 @@ mk_cadence_tyre_chart o =
         fm = opt_form ("chart","cadence-tyre") o
     in mk_chart fm ["tyre","velocity"] r'
 
-gearing_measurements_opt :: OPT
+gearing_measurements_opt :: Opt
 gearing_measurements_opt =
     [("chainring",std_chainrings,"",List)
     ,("sprocket",std_sprockets,"",List)
     ,("iso-tyre","28-630","iso",Atom)]
 
-mk_gearing_measurements :: OPT -> [(G.Gear,Double,Double)]
+mk_gearing_measurements :: Opt -> [(G.Gear,Double,Double)]
 mk_gearing_measurements o =
   let [cr,cs] = map unRl (section o (0,1))
       ty = unTY (o !! 2)
@@ -260,7 +260,7 @@ mk_gearing_measurements o =
       f = L.sortBy (compare `F.on` (\(_,x,_) -> x))
   in f [(g,G.gear_metres ty g * 100,G.gear_inches ty g) | g <- gs]
 
-mk_gearing_measurements_chart :: OPT -> String
+mk_gearing_measurements_chart :: Opt -> String
 mk_gearing_measurements_chart o =
     let f = P.printf "%.1f"
         gs = mk_gearing_measurements o
@@ -270,41 +270,41 @@ mk_gearing_measurements_chart o =
         fm = opt_form ("chart","gearing-measurements") o
     in mk_chart_c fm ["gear","cm","in"] gs'
 
-vam_opt :: OPT
+vam_opt :: Opt
 vam_opt =
     [("vertical-ascension","600","m",Atom)
     ,("time","0:20:00.00","h:m:s",Atom)
     ,("average-gradient","8","%",Atom)
     ,("starting-altitude","0","m",Atom)]
 
-mk_vam :: OPT -> (Double,Double)
+mk_vam :: Opt -> (Double,Double)
 mk_vam o =
   case o of
-    [va,d,gr,a] -> let vmh = VAM.vam (unR va) (unD d)
-                       wkg = VAM.vam_to_power vmh (unR a) (unR gr)
+    [va,d,gr,a] -> let vmh = Vam.vam (unR va) (unD d)
+                       wkg = Vam.vam_to_power vmh (unR a) (unR gr)
                    in (vmh,wkg)
     _ -> error "mk_vam"
 
-mk_vam_chart :: OPT -> String
+mk_vam_chart :: Opt -> String
 mk_vam_chart o =
     let f = P.printf "%.1f"
         (vmh,wkg) = mk_vam o
         fm = opt_form ("chart","velocita-ascensionale-media") o
     in mk_chart fm ["vm/h","w/kg"] [[f vmh,f wkg]]
 
-avg_vel_opt :: OPT
+avg_vel_opt :: Opt
 avg_vel_opt =
     [("distance","30.0","km",Atom)
     ,("time","0:30:00.00","h:m:s",List)]
 
-mk_avg_vel :: OPT -> [(T.Duration,Double)]
+mk_avg_vel :: Opt -> [(T.Duration,Double)]
 mk_avg_vel o =
   let ds = read (var_n (o !! 0))
       ts = unL (o !! 1)
       ks = map (V.kph ds) ts
   in zip ts ks
 
-mk_avg_vel_chart :: OPT -> String
+mk_avg_vel_chart :: Opt -> String
 mk_avg_vel_chart o =
     let f = P.printf "%.1f"
         tv = mk_avg_vel o
@@ -314,18 +314,18 @@ mk_avg_vel_chart o =
 
 -- * Elapsed Time Comparison
 
-et_cmp_opt :: OPT
+et_cmp_opt :: Opt
 et_cmp_opt =
     [("A","0:30:00.00","h:m:s",List)
     ,("B","0:30:00.00","h:m:s",List)]
 
-mk_et_cmp :: OPT -> [(T.Duration,T.Duration)]
+mk_et_cmp :: Opt -> [(T.Duration,T.Duration)]
 mk_et_cmp o =
   let a = unL (o !! 0)
       b = unL (o !! 1)
   in zip a b
 
-mk_et_cmp_chart :: OPT -> String
+mk_et_cmp_chart :: Opt -> String
 mk_et_cmp_chart o =
     let tv = mk_et_cmp o
         fm = opt_form ("chart","elapsed-time-comparison") o

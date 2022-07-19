@@ -5,7 +5,7 @@ author:            Rohan Drape
 maintainer:        rd@rohandrape.net
 stability:         Experimental
 homepage:          http://rohandrape.net/t/hcycling
-tested-with:       GHC == 8.8.4
+tested-with:       GHC == 9.2.2
 build-type:        Simple
 cabal-version:     >= 1.8
 
@@ -28,14 +28,14 @@ library
                    Cycling.Cassette
                    Cycling.Chart
                    Cycling.Gearing
-                   Cycling.HR
+                   Cycling.Hr
                    Cycling.Interval
                    Cycling.Physiology
                    Cycling.Power
                    Cycling.Solve
                    Cycling.Temperature
                    Cycling.Time
-                   Cycling.VAM
+                   Cycling.Vam
                    Cycling.Velocity
                    Cycling.Weight
 

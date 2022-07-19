@@ -1,36 +1,36 @@
-module Cycling.HR where
+module Cycling.Hr where
 
 import Data.Bifunctor {- bifunctors -}
 import Data.List {- base -}
 
 -- * Age predicted heart rate maxima
 
-type HR_MAX = Double->Double
+type Hr_MAX = Double->Double
 
 -- | Dr. William Haskell and Dr. Samuel Fox (1970)
 --
 -- > map (round . hr_max_haskell_and_fox) [36,40] == [184,180]
-hr_max_haskell_and_fox :: HR_MAX
+hr_max_haskell_and_fox :: Hr_MAX
 hr_max_haskell_and_fox age = 220 - age
 
 -- | Robergs R and Landwehr R (2002).
--- \"The Surprising History of the HRmax=220-age Equation\"
+-- \"The Surprising History of the Hrmax=220-age Equation\"
 -- /Journal of Exercise Physiology/ 5 (2): 1–10
 --
 -- > map (round . hr_max_robergs_and_landwehr) [36,40] == [181,178]
-hr_max_robergs_and_landwehr :: HR_MAX
+hr_max_robergs_and_landwehr :: Hr_MAX
 hr_max_robergs_and_landwehr age = 205.8 - (0.685 * age)
 
 -- | Londeree and Moeschberger (University of Missouri)
 --
 -- > map (round . hr_max_londeree_and_moeschberger) [36,40] == [181,178]
-hr_max_londeree_and_moeschberger :: HR_MAX
+hr_max_londeree_and_moeschberger :: Hr_MAX
 hr_max_londeree_and_moeschberger age = 206.3 - (0.711 * age)
 
 -- | Miller et al. (Indiana University)
 --
 -- > map (round . hr_max_miller_et_al) [36,40] == [186,183]
-hr_max_miller_et_al :: HR_MAX
+hr_max_miller_et_al :: Hr_MAX
 hr_max_miller_et_al age = 217 - (0.85 * age)
 
 -- | Hirofumi Tanaka et al.
@@ -38,28 +38,28 @@ hr_max_miller_et_al age = 217 - (0.85 * age)
 -- /J Am Coll Cardiol/, 2001; 37:153-156
 --
 -- > map (round . hr_max_tanaka) [36,40] == [183,180]
-hr_max_tanaka :: HR_MAX
+hr_max_tanaka :: Hr_MAX
 hr_max_tanaka age = 208 - (0.7 * age)
 
 -- | Gellish, Ronald et al (May, 2007)
--- \"Longitudinal Modeling of the Relationship between Age and Maximal HR\".
+-- \"Longitudinal Modeling of the Relationship between Age and Maximal Hr\".
 -- /Medicine & Science in Sports & Exercise/ 39 (5): 822–828.
 --
 -- > map (round . hr_max_oakland_nonlinear) [36,40] == [182,180]
-hr_max_oakland_nonlinear :: HR_MAX
+hr_max_oakland_nonlinear :: Hr_MAX
 hr_max_oakland_nonlinear age = 191.5 - (0.007 * age * age)
 
 -- | Reference values obtained during bicycle ergometry (Lund, Sweden).
 --
 -- > map (round . hr_max_lund) [36,40] == [184,182]
-hr_max_lund :: HR_MAX
+hr_max_lund :: Hr_MAX
 hr_max_lund age = 203.7 / (1 + exp (0.033 * (age - 104.3)))
 
--- | List of age predicted HR maxima functions.
+-- | List of age predicted Hr maxima functions.
 --
 -- > let n = 36 in
 -- > map (\f -> round (f n)) hr_max_all == [184,181,181,186,183,182,184]
-hr_max_all :: [HR_MAX]
+hr_max_all :: [Hr_MAX]
 hr_max_all =
     [hr_max_haskell_and_fox
     ,hr_max_robergs_and_landwehr
@@ -151,7 +151,7 @@ hr_lookup_wb hrm hr =
          Just z -> Just (hr,z,zone_name_wb !! z)
          Nothing -> Nothing
 
--- | GCN HR numbers.
+-- | Gcn Hr numbers.
 --
 -- > let {hr = 167; r = [114,139,157,175]}
 -- > in map (\x -> round (x * 0.01 * hr)) (mapMaybe snd hr_gcn) == r
