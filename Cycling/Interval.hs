@@ -5,7 +5,8 @@ import Control.Monad {- base -}
 import Data.Maybe {- base -}
 import Prelude hiding ((<>)) {- base -}
 
-import Text.Parsers.Frisby {- frisby -}
+import qualified Text.Parsec as P {- parsec -}
+import qualified Text.Parsec.String as String {- parsec -}
 
 -- | An 'Interval' is a /duration/, an /average heart rate/ and
 -- perhaps a /cadence/.
@@ -25,18 +26,27 @@ intervalPP (Interval d hr c) =
 instance Show Interval where
     show = intervalPP
 
--- | Parse an 'Integer'
---
--- > runPeg (newRule integer) "23" == 23
-integer :: P s Integer
-integer = many (oneOf ['0'..'9']) ## read
+-- | A 'Char' parser with no user state.
+type P a = String.GenParser Char () a
 
--- | Parse the optional /cadence/ entry.
---
--- > runPeg (newRule cadence) "^116" == Just 116
--- > runPeg (newRule cadence) "" == Nothing
-cadence :: P s (Maybe Integer)
-cadence = option Nothing (char '^' ->> fmap Just integer)
+{- | Parse an 'Integer'
+
+>>> P.parse integer "" "23"
+Right 23
+-}
+integer :: P Integer
+integer = fmap read (P.many (P.oneOf ['0'..'9']))
+
+{- | Parse the optional /cadence/ entry.
+
+>>> P.parse cadence "" "^116"
+Right (Just 116)
+
+>>> P.parse cadence "" ""
+Right Nothing
+-}
+cadence :: P (Maybe Integer)
+cadence = P.option Nothing (P.char '^' >> fmap Just integer)
 
 -- | Left nested duple to triple.
 to_triple :: ((a,b),c) -> (a,b,c)
@@ -46,52 +56,71 @@ to_triple ((i,j),k) = (i,j,k)
 to_interval :: ((Integer,Integer),Maybe Integer) -> Interval
 to_interval ((i,j),k) = Interval i j k
 
--- | Parse an 'Interval'
---
--- > runPeg (newRule interval) "23@156" == Interval 23 156 Nothing
--- > runPeg (newRule interval) "23@156^116" == Interval 23 156 (Just 116)
-interval :: P s Interval
-interval = fmap to_interval ((integer <<- char '@' <> integer) <> cadence)
+{- | Parse an 'Interval'
 
--- | Parse a 'Char' separated list of /e/ elements.
---
--- > runPeg (newRule (list ',' integer)) "[23,8,3]" == [23,8,3]
---
--- > let r = [Interval 23 156 (Just 116)]
--- > in runPeg (newRule (list ';' interval)) "[23@156^116]" == r
-list :: Char -> P s b -> P s [b]
-list c e =
-    let i_element = e <<- char c
-        t_element = e <<- char ']'
-        p_append (i,j) = i ++ [j]
-        list_c = char '[' ->> many i_element <> t_element
-    in list_c ## p_append
+>>> P.parse interval "" "23@156"
+Right (23@156)
 
--- | Remove commentary prior to initial @[@.
---
--- > runPeg (newRule (rem_pre ->> rest)) "pre [] post" == "[] post"
-rem_pre :: P s ()
-rem_pre = discard (many (noneOf "["))
+>>> P.parse interval "" "23@156^116"
+Right (23@156)^116
+-}
+interval :: P Interval
+interval = do
+  lhs <- integer
+  _ <- P.char '@'
+  rhs <- integer
+  c <- cadence
+  return (to_interval ((lhs, rhs), c))
 
--- | Parse list of 'Interval's, discarding any pre- and post-ambles.
---
--- > let r = [Interval 23 156 Nothing
--- >         ,Interval 8 148 Nothing]
--- > in runPeg (newRule interval_list) "[23@156;8@148]" == r
-interval_list :: P s [Interval]
-interval_list = rem_pre ->> list ';' interval <<- rest
+{- | Parse a 'Char' separated list of /e/ elements.
 
--- | Run 'interval_list' parser.
---
--- > intervals "pre [23@156;8@148] post" == Just [Interval 23 156 Nothing
--- >                                             ,Interval 8 148 Nothing]
---
--- > intervals "no interval" == Nothing
--- > intervals "" == Nothing
+>>> P.parse (list ',' integer) "" "[23,8,3]"
+Right [23,8,3]
+
+>>> let r = [Interval 23 156 (Just 116)]
+>>> P.parse (list ';' interval) "" "[23@156^116]"
+Right [23@156^116]
+-}
+list :: Char -> P t -> P [t]
+list c e = do
+  _ <- P.char '['
+  answer <- P.sepBy1 e (P.char c)
+  _ <- P.char ']'
+  return answer
+
+{- | Remove commentary prior to initial @[@.
+
+>>> P.parse rem_pre "" "pre [] post"
+Right ()
+-}
+rem_pre :: P ()
+rem_pre = P.many (P.noneOf "[") >> return ()
+
+{- | Parse list of 'Interval's, discarding any pre- and post-ambles.
+
+>>> P.parse interval_list "" "[23@156;8@148]"
+Right [23@156,8@148]
+-}
+interval_list :: P [Interval]
+interval_list = do
+  _ <- rem_pre
+  answer <- list ';' interval
+  _ <- P.getInput
+  return answer
+
+{- | Run 'interval_list' parser.
+
+>>> intervals "pre [23@156;8@148] post"
+Just [23@156,8@148]
+
+>>> intervals "no interval"
+Nothing
+
+>>> intervals ""
+Nothing
+-}
 intervals :: String -> Maybe [Interval]
-intervals =
-    let i = fmap Just (interval_list <<- eof) // unit Nothing
-    in runPeg (newRule i)
+intervals = either (const Nothing) Just . P.parse interval_list ""
 
 -- | Given duration /field/ function transform sequence into adjacent
 -- /(start,end)/ duples.
