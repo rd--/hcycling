@@ -17,3 +17,9 @@ pull-rd:
 
 remote-update:
 	ssh rd@rohandrape.net "(cd sw/hcycling ; make mk-cgi)"
+
+indent:
+	fourmolu -i Cycling
+
+doctest:
+	doctest -Wno-x-partial -Wno-incomplete-uni-patterns Cycling

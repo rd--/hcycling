@@ -3,28 +3,33 @@ module Cycling.Interval where
 
 import Control.Monad {- base -}
 import Data.Maybe {- base -}
-import Prelude hiding ((<>)) {- base -}
+import Prelude hiding ((<>) {- base -})
 
 import qualified Text.Parsec as P {- parsec -}
 import qualified Text.Parsec.String as String {- parsec -}
 
--- | An 'Interval' is a /duration/, an /average heart rate/ and
--- perhaps a /cadence/.
-data Interval = Interval {interval_duration :: Integer
-                         ,interval_hr :: Integer
-                         ,interval_cadence :: Maybe Integer}
-              deriving (Eq)
+{- | An 'Interval' is a /duration/, an /average heart rate/ and
+perhaps a /cadence/.
+-}
+data Interval = Interval
+  { interval_duration :: Integer
+  , interval_hr :: Integer
+  , interval_cadence :: Maybe Integer
+  }
+  deriving (Eq)
 
--- | Pretty print 'Interval'.  This is the 'Show' instance.
---
--- > intervalPP (Interval 30 160 (Just 90)) == "30@160^90"
+{- | Pretty print 'Interval'.  This is the 'Show' instance.
+
+>>> intervalPP (Interval 30 160 (Just 90))
+"30@160^90"
+-}
 intervalPP :: Interval -> String
 intervalPP (Interval d hr c) =
-    let c' = maybe "" (('^' :) . show) c
-    in show d ++ "@" ++ show hr ++ c'
+  let c' = maybe "" (('^' :) . show) c
+  in show d ++ "@" ++ show hr ++ c'
 
 instance Show Interval where
-    show = intervalPP
+  show = intervalPP
 
 -- | A 'Char' parser with no user state.
 type P a = String.GenParser Char () a
@@ -35,7 +40,7 @@ type P a = String.GenParser Char () a
 Right 23
 -}
 integer :: P Integer
-integer = fmap read (P.many (P.oneOf ['0'..'9']))
+integer = fmap read (P.many (P.oneOf ['0' .. '9']))
 
 {- | Parse the optional /cadence/ entry.
 
@@ -49,20 +54,20 @@ cadence :: P (Maybe Integer)
 cadence = P.option Nothing (P.char '^' >> fmap Just integer)
 
 -- | Left nested duple to triple.
-to_triple :: ((a,b),c) -> (a,b,c)
-to_triple ((i,j),k) = (i,j,k)
+to_triple :: ((a, b), c) -> (a, b, c)
+to_triple ((i, j), k) = (i, j, k)
 
 -- | Left nested duple to 'Interval'.
-to_interval :: ((Integer,Integer),Maybe Integer) -> Interval
-to_interval ((i,j),k) = Interval i j k
+to_interval :: ((Integer, Integer), Maybe Integer) -> Interval
+to_interval ((i, j), k) = Interval i j k
 
 {- | Parse an 'Interval'
 
 >>> P.parse interval "" "23@156"
-Right (23@156)
+Right 23@156
 
 >>> P.parse interval "" "23@156^116"
-Right (23@156)^116
+Right 23@156^116
 -}
 interval :: P Interval
 interval = do
@@ -122,36 +127,43 @@ Nothing
 intervals :: String -> Maybe [Interval]
 intervals = either (const Nothing) Just . P.parse interval_list ""
 
--- | Given duration /field/ function transform sequence into adjacent
--- /(start,end)/ duples.
---
--- > adjacencies fst [(11,157),(12,158)] == [(0,11),(11,23)]
-adjacencies :: Num b => (a -> b) -> [a] -> [(b,b)]
+{- | Given duration /field/ function transform sequence into adjacent
+/(start,end)/ duples.
+
+>>> adjacencies fst [(11,157),(12,158)]
+[(0,11),(11,23)]
+-}
+adjacencies :: Num b => (a -> b) -> [a] -> [(b, b)]
 adjacencies f =
-    let g n i = case i of
-                  [] -> []
-                  x:i' -> let d = f x
-                              n' = d + n
-                          in (n,n') : g n' i'
-    in g 0
+  let g n i = case i of
+        [] -> []
+        x : i' ->
+          let d = f x
+              n' = d + n
+          in (n, n') : g n' i'
+  in g 0
 
 -- | First element of triple.
-fst3 :: (t,t1,t2) -> t
-fst3 (i,_,_) = i
+fst3 :: (t, t1, t2) -> t
+fst3 (i, _, _) = i
 
 -- | Variant on 'adjacencies' that stores initial entry.
-intervals_adjacent :: [Interval] -> [((Integer,Integer),Interval)]
+intervals_adjacent :: [Interval] -> [((Integer, Integer), Interval)]
 intervals_adjacent i = zip (adjacencies interval_duration i) i
 
--- | Total duration of a set of 'Interval's.
---
--- > let i = [Interval 23 156 Nothing,Interval 8 148 Nothing]
--- > in intervals_duration i == 31
+{- | Total duration of a set of 'Interval's.
+
+>>> let i = [Interval 23 156 Nothing,Interval 8 148 Nothing]
+>>> intervals_duration i
+31
+-}
 intervals_duration :: [Interval] -> Integer
 intervals_duration = sum . map interval_duration
 
--- | Variant of 'intervals_duration'.
---
--- > intervals_duration_m Nothing == 0
+{- | Variant of 'intervals_duration'.
+
+>>> intervals_duration_m Nothing
+0
+-}
 intervals_duration_m :: Maybe [Interval] -> Integer
 intervals_duration_m = fromMaybe 0 . liftM intervals_duration
