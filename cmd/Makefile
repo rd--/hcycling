@@ -3,6 +3,9 @@ all:
 	strip -s index.cgi
 	cp index.cgi ..
 
+install:
+	echo "hcycling/cmd"
+
 clean:
 	rm -f *.o *.hi index.cgi
 

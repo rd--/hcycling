@@ -52,4 +52,3 @@ vam_to_power :: R -> R -> R -> R
 vam_to_power x a gr =
   let n = x / (gradient_factor gr * 100)
   in n * altitude_factor a
-
