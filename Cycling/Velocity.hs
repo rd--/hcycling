@@ -11,7 +11,7 @@ import Music.Theory.Time.Duration {- hmt-base -}
 mile :: Fractional t => t
 mile = 1.609344
 
-{- | Convert from kilometres per hour to miles per hour.
+{- | Convert from kilometres per hour (kph) to miles per hour (mph).
 
 >>> round (kph_to_mph 60)
 37
@@ -19,15 +19,15 @@ mile = 1.609344
 kph_to_mph :: (Fractional t) => t -> t
 kph_to_mph = (*) (recip mile)
 
-{- | Convert from miles per hour to kilometers per hour.
+{- | Convert from miles per hour (mph) to kilometers per hour (kph).
 
->>> round (mph_to_kph 37)
-60
+>>> map (round . mph_to_kph) [15, 37]
+[24,60]
 -}
 mph_to_kph :: (Fractional t) => t -> t
 mph_to_kph = (*) mile
 
-{- | Convert from kilometres per hour to metres per minute.
+{- | Convert from kilometres per hour (kph) to metres per minute (mpm).
 
 >>> kph_to_mpm 45
 750.0
@@ -45,16 +45,16 @@ mpm_to_kph x = (x * 60) / 1000
 
 {- | Convert from kilometres per hour to metres per second.
 
->>> kph_to_mps 45
-12.5
+>>> map kph_to_mps [0.99,3.6,45,72]
+[0.275,1.0,12.5,20.0]
 -}
 kph_to_mps :: (Fractional a) => a -> a
 kph_to_mps x = (x * 1000) / (60 * 60)
 
 {- | Convert from metres per second (mps) to kilometres per hour (kph).
 
->>> mps_to_kph 12.5
-45.0
+>>> map mps_to_kph [0.275, 1, 12.5, 20]
+[0.99,3.6,45.0,72.0]
 -}
 mps_to_kph :: Fractional a => a -> a
 mps_to_kph n = (n * 60 * 60) / 1000

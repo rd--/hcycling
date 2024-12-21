@@ -21,7 +21,6 @@ where
 /Cr/ = rolling resistance co-efficient (kg/m) (~= 0.003)
 /a/ = acceleration of the bicycle (meters/(sec)(sec))
 /V/ = speed of cyclist (meters/sec)
-/Kc/ = convergence parameter (0.5-2.0)
 @
 -}
 power :: (Num a) => a -> a -> a -> a -> a -> a -> a -> a -> a -> a
@@ -47,7 +46,11 @@ power_std m s v =
 
 {- | 'S.solve' 'power_std' equation for velocity with given /tolerance/.
 
->>> round (fst (velocity_std 0.05 70 8 355))
+>>> let t = 0.05
+>>> let m = 62 + 8
+>>> let s = 8
+>>> let w = 355
+>>> round (fst (velocity_std t m s w))
 20
 -}
 velocity_std :: (Fractional x, Ord x) => x -> x -> x -> x -> (x, x)
