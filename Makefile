@@ -23,3 +23,6 @@ indent:
 
 doctest:
 	doctest -Wno-x-partial -Wno-incomplete-uni-patterns Cycling
+
+dep:
+	cabal v1-install csv --allow-newer
