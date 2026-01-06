@@ -5,7 +5,7 @@ A [set](sw/hcycling) of cycling related `cgi` tables.
 Input fields marked `{}` accept comma delimited lists.
 
 © [rohan drape](http://rohandrape.net/),
-  2010-2025,
+  2010-2026,
   [gpl](http://gnu.org/copyleft/)
 
 * * *

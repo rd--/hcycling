@@ -1,6 +1,9 @@
 mk-cgi:
 	(cd cmd; make)
 
+install:
+	cabal v1-install --allow-newer
+
 clean:
 	rm -f */*.o */*.hi *.o *.hi
 	rm -Rf dist
