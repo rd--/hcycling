@@ -1,7 +1,7 @@
 -- | Velocity and distance (unit) related functions.
 module Cycling.Velocity where
 
-import Music.Theory.Time.Duration {- hmt-base -}
+import qualified Music.Theory.Time.Duration as Duration {- hmt-base -}
 
 {- | Conversion factor from miles to kilometers.
 
@@ -74,8 +74,29 @@ feet_to_metres = (*) foot
 {- | Given a /distance/ (in km) and a 'Duration' (in hours, minutes,
 seconds and milli-seconds) calculate average velocity (in kph),
 
->>> map (kph 0.25) [Duration 0 0 20 0,Duration 0 0 15 0]
+>>> map (kph 0.25) [Duration.Duration 0 0 20 0,Duration.Duration 0 0 15 0]
 [45.0,60.0]
 -}
-kph :: (Fractional a) => a -> Duration -> a
-kph k d = k / duration_to_hours d
+kph :: (Fractional a) => a -> Duration.Duration -> a
+kph k d = k / Duration.duration_to_hours d
+
+{- | Convert from kilometres per hour (kph) to minutes per kilometre (mpk).
+
+>>> kph_to_mpk 10
+6.0
+
+>>> kph_to_mpk 12
+5.0
+
+>>> kph_to_mpk 15
+4.0
+
+>>> kph_to_mpk 20
+3.0
+
+>>> import Music.Theory.Time.Notation
+>>> fmin_to_minsec (kph_to_mpk 10.5)
+(5,43)
+-}
+kph_to_mpk :: (Fractional t) => t -> t
+kph_to_mpk x = 60 / x

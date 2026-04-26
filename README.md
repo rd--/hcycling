@@ -12,6 +12,6 @@ Input fields marked `{}` accept comma delimited lists.
 
 ```
 $ make doctest
-Examples: 85  Tried: 85  Errors: 0  Failures: 0
+Examples: 95  Tried: 95  Errors: 0  Failures: 0
 $
 ```
